@@ -7,6 +7,7 @@ urlpatterns = [
         "admin/",
         admin.site.urls,
     ),
+
     path(
         "login/",
         auth_views.LoginView.as_view(
@@ -15,6 +16,7 @@ urlpatterns = [
         ),
         name="login",
     ),
+
     path(
         "logout/",
         auth_views.LogoutView.as_view(),
@@ -39,5 +41,10 @@ urlpatterns = [
     path(
         "",
         include("apps.orders.urls"),
+    ),
+
+    path(
+        "",
+        include("apps.accounts.urls"),
     ),
 ]

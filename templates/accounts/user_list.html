@@ -1,0 +1,439 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+Users · StockFlow
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Administration
+        </div>
+
+        <h1 class="page-heading__title">
+            Users
+        </h1>
+
+        <p class="page-heading__description">
+            Manage application access and operational roles.
+        </p>
+
+    </div>
+
+
+    {% if perms.accounts.add_user %}
+
+        <a
+            href="{% url 'accounts:user_create' %}"
+            class="button button--primary"
+        >
+            + New user
+        </a>
+
+    {% endif %}
+
+</div>
+
+
+<section class="user-summary">
+
+    <div class="user-summary__item">
+
+        <span>
+            Total users
+        </span>
+
+        <strong>
+            {{ metrics.total }}
+        </strong>
+
+    </div>
+
+
+    <div class="user-summary__item">
+
+        <span>
+            Active
+        </span>
+
+        <strong>
+            {{ metrics.active }}
+        </strong>
+
+    </div>
+
+
+    <div class="user-summary__item">
+
+        <span>
+            Managers
+        </span>
+
+        <strong>
+            {{ metrics.managers }}
+        </strong>
+
+    </div>
+
+
+    <div class="user-summary__item">
+
+        <span>
+            Operators
+        </span>
+
+        <strong>
+            {{ metrics.operators }}
+        </strong>
+
+    </div>
+
+</section>
+
+
+<section class="catalog-panel">
+
+    <form
+        method="get"
+        class="user-filters"
+    >
+
+        <input
+            type="search"
+            name="q"
+            value="{{ filters.q }}"
+            placeholder="Username, name or email..."
+        >
+
+
+        <select name="role">
+
+            <option value="">
+                All roles
+            </option>
+
+            {% for value, label in roles %}
+
+                <option
+                    value="{{ value }}"
+                    {% if filters.role == value %}
+                        selected
+                    {% endif %}
+                >
+                    {{ label }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <select name="active">
+
+            <option
+                value="all"
+                {% if filters.active == "all" %}
+                    selected
+                {% endif %}
+            >
+                All statuses
+            </option>
+
+            <option
+                value="active"
+                {% if filters.active == "active" %}
+                    selected
+                {% endif %}
+            >
+                Active
+            </option>
+
+            <option
+                value="inactive"
+                {% if filters.active == "inactive" %}
+                    selected
+                {% endif %}
+            >
+                Inactive
+            </option>
+
+        </select>
+
+
+        <button
+            type="submit"
+            class="button button--secondary"
+        >
+            Apply
+        </button>
+
+
+        {% if filters.q or filters.role or filters.active != "all" %}
+
+            <a
+                href="{% url 'accounts:user_list' %}"
+                class="filter-clear"
+            >
+                Clear
+            </a>
+
+        {% endif %}
+
+    </form>
+
+
+    {% if page.object_list %}
+
+        <div class="table-wrapper">
+
+            <table class="operations-table">
+
+                <thead>
+
+                    <tr>
+                        <th>User</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Last login</th>
+                        <th></th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for managed_user in page %}
+
+                        <tr>
+
+                            <td>
+
+                                <div class="user-identity-cell">
+
+                                    <div class="user-avatar">
+                                        {{ managed_user.username|first|upper }}
+                                    </div>
+
+                                    <div>
+
+                                        <div class="entity-name">
+                                            {{ managed_user.username }}
+                                        </div>
+
+
+                                        {% if managed_user.pk == request.user.pk %}
+
+                                            <div class="table-secondary">
+                                                You
+                                            </div>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                {% if managed_user.get_full_name %}
+
+                                    {{ managed_user.get_full_name }}
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        —
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if managed_user.email %}
+
+                                    {{ managed_user.email }}
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        —
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if managed_user.is_superuser %}
+
+                                    <span class="user-role user-role--superuser">
+                                        Superuser
+                                    </span>
+
+                                {% elif managed_user.groups.all %}
+
+                                    {% for group in managed_user.groups.all %}
+
+                                        {% if group.name == "Manager" %}
+
+                                            <span class="user-role user-role--manager">
+                                                Manager
+                                            </span>
+
+                                        {% elif group.name == "Operator" %}
+
+                                            <span class="user-role user-role--operator">
+                                                Operator
+                                            </span>
+
+                                        {% endif %}
+
+                                    {% endfor %}
+
+                                {% else %}
+
+                                    <span class="user-role user-role--none">
+                                        No role
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if managed_user.is_active %}
+
+                                    <span class="status status--healthy">
+                                        Active
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status status--inactive">
+                                        Inactive
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="user-last-login">
+
+                                {% if managed_user.last_login %}
+
+                                    {{ managed_user.last_login|date:"d M Y H:i" }}
+
+                                {% else %}
+
+                                    Never
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="entity-action">
+
+                                {% if perms.accounts.change_user and not managed_user.is_superuser %}
+
+                                    <a
+                                        href="{% url 'accounts:user_edit' managed_user.pk %}"
+                                        class="table-action"
+                                    >
+                                        Edit
+                                    </a>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        {% if page.paginator.num_pages > 1 %}
+
+            <div class="pagination">
+
+                <div class="pagination__summary">
+                    Page {{ page.number }}
+                    of {{ page.paginator.num_pages }}
+                </div>
+
+
+                <div class="pagination__actions">
+
+                    {% if page.has_previous %}
+
+                        <a
+                            href="?page={{ page.previous_page_number }}&q={{ filters.q }}&role={{ filters.role }}&active={{ filters.active }}"
+                            class="button button--secondary button--small"
+                        >
+                            Previous
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if page.has_next %}
+
+                        <a
+                            href="?page={{ page.next_page_number }}&q={{ filters.q }}&role={{ filters.role }}&active={{ filters.active }}"
+                            class="button button--secondary button--small"
+                        >
+                            Next
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+
+    {% else %}
+
+        <div class="catalog-empty">
+
+            <div class="catalog-empty__title">
+                No users found
+            </div>
+
+            <p>
+                Try changing the current filters.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

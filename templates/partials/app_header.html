@@ -100,9 +100,20 @@
 
 
             {% if perms.accounts.view_user %}
-                <span class="main-nav__link main-nav__link--disabled">
+
+                <a
+                    href="{% url 'accounts:user_list' %}"
+                    class="
+                        main-nav__link
+
+                        {% if request.resolver_match.namespace == 'accounts' %}
+                            main-nav__link--active
+                        {% endif %}
+                    "
+                >
                     Users
-                </span>
+                </a>
+
             {% endif %}
 
         </nav>

@@ -1,0 +1,243 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+
+{% if mode == "create" %}
+    New user · StockFlow
+{% else %}
+    Edit {{ managed_user.username }} · StockFlow
+{% endif %}
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="breadcrumb">
+
+    <a href="{% url 'accounts:user_list' %}">
+        Users
+    </a>
+
+    <span>/</span>
+
+    <span>
+
+        {% if mode == "create" %}
+            New user
+        {% else %}
+            {{ managed_user.username }}
+        {% endif %}
+
+    </span>
+
+</div>
+
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Administration
+        </div>
+
+        <h1 class="page-heading__title">
+
+            {% if mode == "create" %}
+                New user
+            {% else %}
+                Edit user
+            {% endif %}
+
+        </h1>
+
+        <p class="page-heading__description">
+
+            {% if mode == "create" %}
+                Create an account and assign its operational role.
+            {% else %}
+                Update account information, role and access status.
+            {% endif %}
+
+        </p>
+
+    </div>
+
+</div>
+
+
+<form
+    method="post"
+    class="user-form"
+>
+
+    {% csrf_token %}
+
+
+    {% if form.non_field_errors %}
+
+        <div class="form-error user-form-error">
+
+            {% for error in form.non_field_errors %}
+
+                <div>
+                    {{ error }}
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    <section class="form-panel">
+
+        <div class="form-panel__header">
+
+            <div class="section-kicker">
+                Account
+            </div>
+
+            <h2>
+                User information
+            </h2>
+
+        </div>
+
+
+        <div class="user-form-grid">
+
+            {% for field in form %}
+
+                <div
+                    class="
+                        form-field
+
+                        {% if field.name == 'is_active' %}
+                            form-field--checkbox
+                        {% endif %}
+                    "
+                >
+
+                    {% if field.name == "is_active" %}
+
+                        <label class="checkbox-field">
+
+                            {{ field }}
+
+                            <span>
+                                Active account
+                            </span>
+
+                        </label>
+
+
+                    {% else %}
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                    {% endif %}
+
+
+                    {% if field.help_text %}
+
+                        <div class="field-help">
+                            {{ field.help_text|safe }}
+                        </div>
+
+                    {% endif %}
+
+
+                    {% for error in field.errors %}
+
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <div class="user-role-guide">
+
+            <div>
+
+                <span class="user-role user-role--operator">
+                    Operator
+                </span>
+
+                <p>
+                    Works with catalog, inventory and orders.
+                    Cannot manage application users.
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <span class="user-role user-role--manager">
+                    Manager
+                </span>
+
+                <p>
+                    Includes operational access plus catalog
+                    administration and user management.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% if mode == "edit" and managed_user.pk == request.user.pk %}
+
+            <div class="self-account-notice">
+                Your own account cannot be deactivated or
+                demoted from Manager.
+            </div>
+
+        {% endif %}
+
+
+        <div class="form-actions">
+
+            <a
+                href="{% url 'accounts:user_list' %}"
+                class="button button--secondary"
+            >
+                Cancel
+            </a>
+
+
+            <button
+                type="submit"
+                class="button button--primary"
+            >
+
+                {% if mode == "create" %}
+                    Create user
+                {% else %}
+                    Save changes
+                {% endif %}
+
+            </button>
+
+        </div>
+
+    </section>
+
+</form>
+
+{% endblock %}
