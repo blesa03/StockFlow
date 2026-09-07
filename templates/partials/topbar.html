@@ -1,0 +1,55 @@
+<header class="topbar">
+
+    <div class="topbar__context">
+        Internal operations
+    </div>
+
+    <div class="topbar__user">
+
+        <div class="topbar__identity">
+
+            <div class="topbar__username">
+                {% if request.user.get_full_name %}
+                    {{ request.user.get_full_name }}
+                {% else %}
+                    {{ request.user.username }}
+                {% endif %}
+            </div>
+
+            <div class="topbar__roles">
+
+                {% if request.user.is_superuser %}
+                    <span class="role-badge">
+                        Superuser
+                    </span>
+                {% else %}
+
+                    {% for group in request.user.groups.all %}
+                        <span class="role-badge">
+                            {{ group.name }}
+                        </span>
+                    {% endfor %}
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <form
+            method="post"
+            action="{% url 'logout' %}"
+        >
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="button button--secondary button--small"
+            >
+                Sign out
+            </button>
+        </form>
+
+    </div>
+
+</header>

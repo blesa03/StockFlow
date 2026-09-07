@@ -1,0 +1,137 @@
+<aside class="sidebar">
+
+    <div class="sidebar__brand">
+        <div class="sidebar__brand-mark">
+            SF
+        </div>
+
+        <div>
+            <div class="sidebar__brand-name">
+                StockFlow
+            </div>
+
+            <div class="sidebar__brand-subtitle">
+                Inventory management
+            </div>
+        </div>
+    </div>
+
+
+    <nav class="sidebar__nav">
+
+        <div class="nav-section">
+
+            <a
+                href="{% url 'dashboard' %}"
+                class="
+                    nav-link
+                    {% if request.resolver_match.url_name == 'dashboard' %}
+                        nav-link--active
+                    {% endif %}
+                "
+            >
+                Dashboard
+            </a>
+
+        </div>
+
+
+        {% if perms.catalog %}
+
+            <div class="nav-section">
+
+                <div class="nav-section__title">
+                    Catalog
+                </div>
+
+                {% if perms.catalog.view_product %}
+                    <span
+                        class="nav-link nav-link--disabled"
+                        aria-disabled="true"
+                    >
+                        Products
+                    </span>
+                {% endif %}
+
+                {% if perms.catalog.view_category %}
+                    <span
+                        class="nav-link nav-link--disabled"
+                        aria-disabled="true"
+                    >
+                        Categories
+                    </span>
+                {% endif %}
+
+                {% if perms.catalog.view_supplier %}
+                    <span
+                        class="nav-link nav-link--disabled"
+                        aria-disabled="true"
+                    >
+                        Suppliers
+                    </span>
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+
+        {% if perms.inventory or perms.orders %}
+
+            <div class="nav-section">
+
+                <div class="nav-section__title">
+                    Operations
+                </div>
+
+                {% if perms.inventory.view_inventorybalance %}
+                    <span
+                        class="nav-link nav-link--disabled"
+                        aria-disabled="true"
+                    >
+                        Inventory
+                    </span>
+                {% endif %}
+
+                {% if perms.orders.view_order %}
+                    <span
+                        class="nav-link nav-link--disabled"
+                        aria-disabled="true"
+                    >
+                        Orders
+                    </span>
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+
+        {% if perms.accounts.view_user %}
+
+            <div class="nav-section">
+
+                <div class="nav-section__title">
+                    Admin
+                </div>
+
+                <span
+                    class="nav-link nav-link--disabled"
+                    aria-disabled="true"
+                >
+                    Users
+                </span>
+
+            </div>
+
+        {% endif %}
+
+    </nav>
+
+
+    <div class="sidebar__footer">
+        StockFlow
+        <span>v0.1.0</span>
+    </div>
+
+</aside>

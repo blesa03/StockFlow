@@ -1,0 +1,134 @@
+<header class="app-header">
+
+    <div class="app-header__inner">
+
+        <div class="brand">
+
+            <a
+                href="{% url 'dashboard' %}"
+                class="brand__link"
+            >
+
+                <div class="brand__mark">
+                    SF
+                </div>
+
+                <div class="brand__identity">
+
+                    <div class="brand__name">
+                        StockFlow
+                    </div>
+
+                    <div class="brand__subtitle">
+                        Inventory operations
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+        <nav class="main-nav">
+
+            <a
+                href="{% url 'dashboard' %}"
+                class="
+                    main-nav__link
+                    {% if request.resolver_match.url_name == 'dashboard' %}
+                        main-nav__link--active
+                    {% endif %}
+                "
+            >
+                Overview
+            </a>
+
+
+            {% if perms.catalog.view_product %}
+                <span class="main-nav__link main-nav__link--disabled">
+                    Products
+                </span>
+            {% endif %}
+
+
+            {% if perms.inventory.view_inventorybalance %}
+                <span class="main-nav__link main-nav__link--disabled">
+                    Inventory
+                </span>
+            {% endif %}
+
+
+            {% if perms.orders.view_order %}
+                <span class="main-nav__link main-nav__link--disabled">
+                    Orders
+                </span>
+            {% endif %}
+
+
+            {% if perms.catalog.view_supplier %}
+                <span class="main-nav__link main-nav__link--disabled">
+                    Suppliers
+                </span>
+            {% endif %}
+
+
+            {% if perms.accounts.view_user %}
+                <span class="main-nav__link main-nav__link--disabled">
+                    Users
+                </span>
+            {% endif %}
+
+        </nav>
+
+
+        <div class="header-user">
+
+            <div class="header-user__identity">
+
+                <div class="header-user__name">
+                    {% if request.user.get_full_name %}
+                        {{ request.user.get_full_name }}
+                    {% else %}
+                        {{ request.user.username }}
+                    {% endif %}
+                </div>
+
+                <div class="header-user__role">
+
+                    {% if request.user.is_superuser %}
+                        Superuser
+                    {% else %}
+
+                        {% for group in request.user.groups.all %}
+                            {{ group.name }}
+                        {% empty %}
+                            User
+                        {% endfor %}
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <form
+                method="post"
+                action="{% url 'logout' %}"
+            >
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="button button--secondary button--small"
+                >
+                    Sign out
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+
+</header>

@@ -1,0 +1,339 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+Inventory Overview · StockFlow
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Operations
+        </div>
+
+        <h1 class="page-heading__title">
+            Inventory overview
+        </h1>
+
+        <p class="page-heading__description">
+            Current stock health and inventory activity.
+        </p>
+
+    </div>
+
+    <div class="page-heading__date">
+        {% now "d M Y" %}
+    </div>
+
+</div>
+
+
+<section class="operations-summary">
+
+    <div class="summary-stat">
+
+        <div class="summary-stat__label">
+            Products
+        </div>
+
+        <div class="summary-stat__value">
+            {{ metrics.products }}
+        </div>
+
+        <div class="summary-stat__meta">
+            Active catalog
+        </div>
+
+    </div>
+
+
+    <div class="summary-stat">
+
+        <div class="summary-stat__label">
+            Need attention
+        </div>
+
+        <div
+            class="
+                summary-stat__value
+                {% if metrics.low_stock %}
+                    summary-stat__value--warning
+                {% endif %}
+            "
+        >
+            {{ metrics.low_stock }}
+        </div>
+
+        <div class="summary-stat__meta">
+            Low or out of stock
+        </div>
+
+    </div>
+
+
+    <div class="summary-stat">
+
+        <div class="summary-stat__label">
+            Draft orders
+        </div>
+
+        <div class="summary-stat__value">
+            {{ metrics.draft_orders }}
+        </div>
+
+        <div class="summary-stat__meta">
+            Awaiting confirmation
+        </div>
+
+    </div>
+
+
+    <div class="summary-stat">
+
+        <div class="summary-stat__label">
+            Movements today
+        </div>
+
+        <div class="summary-stat__value">
+            {{ metrics.movements_today }}
+        </div>
+
+        <div class="summary-stat__meta">
+            Inventory operations
+        </div>
+
+    </div>
+
+</section>
+
+
+<div class="operations-layout">
+
+
+    <section class="operations-panel">
+
+        <div class="operations-panel__header">
+
+            <div>
+
+                <div class="section-kicker">
+                    Stock control
+                </div>
+
+                <h2 class="operations-panel__title">
+                    Stock requiring attention
+                </h2>
+
+            </div>
+
+            <span class="operations-panel__count">
+                {{ metrics.low_stock }}
+            </span>
+
+        </div>
+
+
+        {% if attention_products %}
+
+            <div class="table-wrapper">
+
+                <table class="operations-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>SKU</th>
+                            <th>Product</th>
+                            <th class="table-number">Stock</th>
+                            <th class="table-number">Min.</th>
+                            <th>Status</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for product in attention_products %}
+
+                            <tr>
+
+                                <td>
+                                    <span class="sku">
+                                        {{ product.sku }}
+                                    </span>
+                                </td>
+
+
+                                <td>
+
+                                    <div class="product-cell__name">
+                                        {{ product.name }}
+                                    </div>
+
+                                    <div class="product-cell__category">
+                                        {{ product.category.name }}
+                                    </div>
+
+                                </td>
+
+
+                                <td class="table-number stock-number">
+                                    {{ product.stock_quantity }}
+                                </td>
+
+
+                                <td class="table-number">
+                                    {{ product.minimum_stock }}
+                                </td>
+
+
+                                <td>
+
+                                    {% if product.stock_status == "out" %}
+
+                                        <span class="status status--out">
+                                            Out
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status status--low">
+                                            Low
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="inventory-healthy">
+
+                <div class="inventory-healthy__indicator">
+                    ✓
+                </div>
+
+                <div>
+
+                    <div class="inventory-healthy__title">
+                        Inventory within thresholds
+                    </div>
+
+                    <div class="inventory-healthy__description">
+                        No products currently require attention.
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <aside class="flow-panel">
+
+        <div class="flow-panel__header">
+
+            <div class="section-kicker">
+                Activity
+            </div>
+
+            <h2 class="operations-panel__title">
+                Recent flow
+            </h2>
+
+        </div>
+
+
+        {% if recent_movements %}
+
+            <div class="flow-list">
+
+                {% for movement in recent_movements %}
+
+                    <article class="flow-item">
+
+                        <div
+                            class="
+                                flow-item__amount
+
+                                {% if movement.quantity_delta > 0 %}
+                                    flow-item__amount--in
+                                {% else %}
+                                    flow-item__amount--out
+                                {% endif %}
+                            "
+                        >
+
+                            {% if movement.quantity_delta > 0 %}
+                                +{{ movement.quantity_delta }}
+                            {% else %}
+                                {{ movement.quantity_delta }}
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="flow-item__body">
+
+                            <div class="flow-item__sku">
+                                {{ movement.product.sku }}
+                            </div>
+
+                            <div class="flow-item__name">
+                                {{ movement.product.name }}
+                            </div>
+
+                            <div class="flow-item__meta">
+
+                                {{ movement.get_movement_type_display }}
+
+                                {% if movement.order %}
+                                    · {{ movement.order.order_number }}
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <time class="flow-item__time">
+                            {{ movement.created_at|timesince }}
+                        </time>
+
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="flow-empty">
+                No inventory movements yet.
+            </div>
+
+        {% endif %}
+
+    </aside>
+
+
+</div>
+
+{% endblock %}
