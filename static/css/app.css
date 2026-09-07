@@ -3447,3 +3447,171 @@ a.main-nav__link:hover {
         }
 
     }
+
+    /* =========================================================
+    ORDER WORKFLOW ACTIONS
+    ========================================================= */
+
+    .order-action-panel {
+        background: var(--surface);
+
+        border:
+            1px solid
+            var(--border-strong);
+
+        border-radius: var(--radius-medium);
+
+        overflow: hidden;
+    }
+
+
+    .order-action-panel__header {
+        padding: 16px;
+
+        border-bottom:
+            1px solid
+            var(--border);
+    }
+
+
+    .order-action-panel__header h2 {
+        margin: 5px 0 0;
+
+        font-size: 14px;
+    }
+
+
+    .order-action-panel__body {
+        display: flex;
+        flex-direction: column;
+
+        gap: 9px;
+
+        padding: 14px;
+    }
+
+
+    .confirmation-explanation {
+        margin-bottom: 4px;
+
+        padding: 11px 12px;
+
+        background: var(--surface-secondary);
+
+        border-left:
+            3px solid
+            var(--brand);
+    }
+
+
+    .confirmation-explanation strong {
+        display: block;
+
+        color: var(--graphite);
+
+        font-size: 10px;
+    }
+
+
+    .confirmation-explanation span {
+        display: block;
+
+        margin-top: 4px;
+
+        color: var(--text-muted);
+
+        font-size: 9px;
+
+        line-height: 1.5;
+    }
+
+
+    .button--full {
+        width: 100%;
+    }
+
+
+    .button--confirm {
+        background: var(--graphite);
+        color: #ffffff;
+
+        border-color: var(--graphite);
+    }
+
+
+    .button--confirm:hover {
+        background: #111513;
+
+        border-color: #111513;
+    }
+
+
+    .button--danger-outline {
+        background: var(--surface);
+        color: var(--danger);
+
+        border-color: #fecaca;
+    }
+
+
+    .button--danger-outline:hover {
+        background: var(--danger-bg);
+
+        border-color: var(--danger);
+    }
+
+
+    .button--disabled {
+        background: #f3f4f6;
+        color: #9ca3af;
+
+        border-color: var(--border);
+
+        cursor: not-allowed;
+    }
+
+
+    .action-help {
+        margin-top: -3px;
+
+        color: var(--text-muted);
+
+        font-size: 8px;
+
+        line-height: 1.4;
+    }
+
+
+    .order-confirmed-state {
+        padding: 13px 14px;
+
+        background: var(--success-bg);
+
+        border-left:
+            3px solid
+            var(--success);
+
+        font-size: 10px;
+    }
+
+
+    .order-confirmed-state strong {
+        display: block;
+
+        color: var(--success);
+
+        font-size: 10px;
+    }
+
+
+    .order-confirmed-state span {
+        display: block;
+
+        margin-top: 4px;
+
+        color: var(--text-secondary);
+
+        font-size: 9px;
+
+        line-height: 1.45;
+    }

@@ -17,6 +17,8 @@ from django.views.decorators.http import (
     require_POST,
 )
 
+from apps.inventory.services import InventoryError
+
 from .forms import (
     OrderForm,
     OrderItemForm,
@@ -31,6 +33,8 @@ from .selectors import (
 from .services import (
     OrderError,
     add_order_item,
+    cancel_order,
+    confirm_order,
     create_order,
     remove_order_item,
     update_order_item_quantity,
@@ -319,6 +323,92 @@ def order_item_remove(
         messages.success(
             request,
             "Product removed from order.",
+        )
+
+    return redirect(
+        "orders:order_detail",
+        order_id=order.pk,
+    )
+
+
+@login_required
+@permission_required(
+    "orders.confirm_order",
+    raise_exception=True,
+)
+@require_POST
+def order_confirm(
+    request,
+    order_id,
+):
+    order = get_object_or_404(
+        Order,
+        pk=order_id,
+    )
+
+    try:
+        confirm_order(
+            order=order,
+            confirmed_by=request.user,
+        )
+
+    except (
+        OrderError,
+        InventoryError,
+    ) as exc:
+        messages.error(
+            request,
+            str(exc),
+        )
+
+    else:
+        messages.success(
+            request,
+            (
+                f"{order.order_number} "
+                "confirmed successfully."
+            ),
+        )
+
+    return redirect(
+        "orders:order_detail",
+        order_id=order.pk,
+    )
+
+
+@login_required
+@permission_required(
+    "orders.cancel_order",
+    raise_exception=True,
+)
+@require_POST
+def order_cancel(
+    request,
+    order_id,
+):
+    order = get_object_or_404(
+        Order,
+        pk=order_id,
+    )
+
+    try:
+        cancel_order(
+            order=order,
+        )
+
+    except OrderError as exc:
+        messages.error(
+            request,
+            str(exc),
+        )
+
+    else:
+        messages.success(
+            request,
+            (
+                f"{order.order_number} "
+                "cancelled."
+            ),
         )
 
     return redirect(

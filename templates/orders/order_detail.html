@@ -124,15 +124,19 @@
                             <tr>
                                 <th>SKU</th>
                                 <th>Product</th>
+
                                 <th class="table-number">
                                     Available
                                 </th>
+
                                 <th class="table-number">
                                     Unit price
                                 </th>
+
                                 <th>
                                     Quantity
                                 </th>
+
                                 <th class="table-number">
                                     Line total
                                 </th>
@@ -183,7 +187,7 @@
                                         </span>
 
 
-                                        {% if item.quantity > item.product.inventory_balance.quantity %}
+                                        {% if order.is_editable and item.quantity > item.product.inventory_balance.quantity %}
 
                                             <div class="stock-shortage-label">
                                                 shortage
@@ -356,6 +360,7 @@
 
                         {{ add_item_form.product }}
 
+
                         {% for error in add_item_form.product.errors %}
 
                             <div class="field-error">
@@ -374,6 +379,7 @@
                         </label>
 
                         {{ add_item_form.quantity }}
+
 
                         {% for error in add_item_form.quantity.errors %}
 
@@ -397,9 +403,9 @@
 
 
                 <div class="draft-stock-note">
-                    Adding or editing draft lines does not reserve
-                    or modify inventory. Stock is validated only
-                    when the order is confirmed.
+                    Draft lines do not reserve or modify inventory.
+                    Current stock is validated atomically when the
+                    order is confirmed.
                 </div>
 
             </section>
@@ -429,36 +435,62 @@
             <dl class="order-info-list">
 
                 <div>
-                    <dt>Customer</dt>
+
+                    <dt>
+                        Customer
+                    </dt>
+
                     <dd>
                         {{ order.customer_name }}
                     </dd>
+
                 </div>
 
 
                 <div>
-                    <dt>Status</dt>
+
+                    <dt>
+                        Status
+                    </dt>
+
                     <dd>
                         {{ order.get_status_display }}
                     </dd>
+
                 </div>
 
 
                 <div>
-                    <dt>Created</dt>
+
+                    <dt>
+                        Created
+                    </dt>
+
                     <dd>
                         {{ order.created_at|date:"d M Y H:i" }}
                     </dd>
+
                 </div>
 
 
-                {% if order.confirmed_at %}
+                {% if order.confirmed_by %}
 
                     <div>
-                        <dt>Confirmed</dt>
+
+                        <dt>
+                            Confirmed by
+                        </dt>
+
                         <dd>
-                            {{ order.confirmed_at|date:"d M Y H:i" }}
+
+                            {% if order.confirmed_by.get_full_name %}
+                                {{ order.confirmed_by.get_full_name }}
+                            {% else %}
+                                {{ order.confirmed_by.username }}
+                            {% endif %}
+
                         </dd>
+
                     </div>
 
                 {% endif %}
@@ -486,11 +518,15 @@
             <div class="order-notes">
 
                 {% if order.notes %}
+
                     {{ order.notes|linebreaksbr }}
+
                 {% else %}
+
                     <span class="text-muted">
                         No notes for this order.
                     </span>
+
                 {% endif %}
 
             </div>
@@ -498,7 +534,104 @@
         </section>
 
 
-        {% if order.is_editable %}
+        {% if order.status == "DRAFT" %}
+
+            <section class="order-action-panel">
+
+                <div class="order-action-panel__header">
+
+                    <div class="section-kicker">
+                        Workflow
+                    </div>
+
+                    <h2>
+                        Draft actions
+                    </h2>
+
+                </div>
+
+
+                <div class="order-action-panel__body">
+
+                    <div class="confirmation-explanation">
+
+                        <strong>
+                            Confirmation is atomic
+                        </strong>
+
+                        <span>
+                            All product stock is validated before
+                            anything is changed. If one line cannot
+                            be fulfilled, the entire confirmation
+                            is rejected.
+                        </span>
+
+                    </div>
+
+
+                    {% if perms.orders.confirm_order %}
+
+                        {% if order.items.all %}
+
+                            <form
+                                method="post"
+                                action="{% url 'orders:order_confirm' order.pk %}"
+                            >
+
+                                {% csrf_token %}
+
+                                <button
+                                    type="submit"
+                                    class="button button--confirm button--full"
+                                >
+                                    Confirm order
+                                </button>
+
+                            </form>
+
+                        {% else %}
+
+                            <button
+                                type="button"
+                                class="button button--disabled button--full"
+                                disabled
+                            >
+                                Confirm order
+                            </button>
+
+                            <div class="action-help">
+                                Add at least one product before confirmation.
+                            </div>
+
+                        {% endif %}
+
+                    {% endif %}
+
+
+                    {% if perms.orders.cancel_order %}
+
+                        <form
+                            method="post"
+                            action="{% url 'orders:order_cancel' order.pk %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="button button--danger-outline button--full"
+                            >
+                                Cancel draft
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
+                </div>
+
+            </section>
+
 
             <div class="order-draft-state">
 
@@ -507,21 +640,38 @@
                 </strong>
 
                 <span>
-                    You can modify its lines without affecting stock.
+                    Lines can still be modified without affecting stock.
                 </span>
 
             </div>
+
+
+        {% elif order.status == "CONFIRMED" %}
+
+            <div class="order-confirmed-state">
+
+                <strong>
+                    Confirmed order
+                </strong>
+
+                <span>
+                    Inventory was deducted and stock movements
+                    were recorded. This order is now locked.
+                </span>
+
+            </div>
+
 
         {% else %}
 
             <div class="order-locked-state">
 
                 <strong>
-                    Order locked
+                    Cancelled order
                 </strong>
 
                 <span>
-                    Lines can no longer be modified.
+                    This draft was cancelled without modifying inventory.
                 </span>
 
             </div>
