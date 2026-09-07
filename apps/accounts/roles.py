@@ -1,6 +1,5 @@
 from django.contrib.auth.models import Group, Permission
 
-
 MANAGER_GROUP = "Manager"
 OPERATOR_GROUP = "Operator"
 

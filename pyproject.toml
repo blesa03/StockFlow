@@ -1,0 +1,33 @@
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+extend-exclude = [
+    "migrations",
+    "static/vendor",
+]
+
+[tool.ruff.lint]
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "I",
+    "B",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["apps"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
