@@ -20,6 +20,11 @@
     >
 </head>
 
+<script
+    src="{% static 'vendor/htmx.min.js' %}"
+    defer
+></script>
+
 <body class="{% block body_class %}{% endblock %}">
     {% block body %}{% endblock %}
 </body>

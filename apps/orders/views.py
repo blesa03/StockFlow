@@ -3,9 +3,7 @@ from django.contrib.auth.decorators import (
     login_required,
     permission_required,
 )
-from django.core.exceptions import (
-    PermissionDenied,
-)
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import (
@@ -13,9 +11,7 @@ from django.shortcuts import (
     redirect,
     render,
 )
-from django.views.decorators.http import (
-    require_POST,
-)
+from django.views.decorators.http import require_POST
 
 from apps.inventory.services import InventoryError
 
@@ -41,15 +37,82 @@ from .services import (
 )
 
 
+def _is_htmx(request):
+    return (
+        request.headers.get("HX-Request")
+        == "true"
+    )
+
+
 def _get_order_or_404(order_id):
     try:
         return get_order_detail(
             order_id
         )
+
     except Order.DoesNotExist as exc:
         raise Http404(
             "Order not found."
         ) from exc
+
+
+def _render_order_workspace(
+    request,
+    order_id,
+    *,
+    add_item_form=None,
+    feedback="",
+    feedback_level="success",
+):
+    order = _get_order_or_404(
+        order_id
+    )
+
+    if add_item_form is None:
+        add_item_form = OrderItemForm()
+
+    return render(
+        request,
+        "orders/partials/order_workspace.html",
+        {
+            "order": order,
+            "add_item_form": add_item_form,
+            "feedback": feedback,
+            "feedback_level": feedback_level,
+        },
+    )
+
+
+def _action_response(
+    request,
+    order,
+    *,
+    feedback,
+    level="success",
+):
+    if _is_htmx(request):
+        return _render_order_workspace(
+            request,
+            order.pk,
+            feedback=feedback,
+            feedback_level=level,
+        )
+
+    if level == "error":
+        messages.error(
+            request,
+            feedback,
+        )
+    else:
+        messages.success(
+            request,
+            feedback,
+        )
+
+    return redirect(
+        "orders:order_detail",
+        order_id=order.pk,
+    )
 
 
 @login_required
@@ -155,7 +218,10 @@ def order_create(request):
     "orders.view_order",
     raise_exception=True,
 )
-def order_detail(request, order_id):
+def order_detail(
+    request,
+    order_id,
+):
     order = _get_order_or_404(
         order_id
     )
@@ -191,6 +257,17 @@ def order_detail(request, order_id):
                 )
 
             except OrderError as exc:
+                if _is_htmx(request):
+                    return _render_order_workspace(
+                        request,
+                        order.pk,
+                        add_item_form=(
+                            add_item_form
+                        ),
+                        feedback=str(exc),
+                        feedback_level="error",
+                    )
+
                 messages.error(
                     request,
                     str(exc),
@@ -201,6 +278,15 @@ def order_detail(request, order_id):
                     order_id=order.pk,
                 )
 
+            if _is_htmx(request):
+                return _render_order_workspace(
+                    request,
+                    order.pk,
+                    feedback=(
+                        "Product added to order."
+                    ),
+                )
+
             messages.success(
                 request,
                 "Product added to order.",
@@ -209,6 +295,18 @@ def order_detail(request, order_id):
             return redirect(
                 "orders:order_detail",
                 order_id=order.pk,
+            )
+
+        if _is_htmx(request):
+            return _render_order_workspace(
+                request,
+                order.pk,
+                add_item_form=add_item_form,
+                feedback=(
+                    "Please correct the "
+                    "highlighted fields."
+                ),
+                feedback_level="error",
             )
 
     context = {
@@ -250,39 +348,40 @@ def order_item_update(
     )
 
     if not form.is_valid():
-        messages.error(
+        return _action_response(
             request,
-            "Quantity must be greater than zero.",
-        )
-
-        return redirect(
-            "orders:order_detail",
-            order_id=order.pk,
+            order,
+            feedback=(
+                "Quantity must be "
+                "greater than zero."
+            ),
+            level="error",
         )
 
     try:
         update_order_item_quantity(
             item=item,
-            quantity=form.cleaned_data[
-                "quantity"
-            ],
+            quantity=(
+                form.cleaned_data[
+                    "quantity"
+                ]
+            ),
         )
 
     except OrderError as exc:
-        messages.error(
+        return _action_response(
             request,
-            str(exc),
+            order,
+            feedback=str(exc),
+            level="error",
         )
 
-    else:
-        messages.success(
-            request,
-            "Order quantity updated.",
-        )
-
-    return redirect(
-        "orders:order_detail",
-        order_id=order.pk,
+    return _action_response(
+        request,
+        order,
+        feedback=(
+            "Order quantity updated."
+        ),
     )
 
 
@@ -314,20 +413,19 @@ def order_item_remove(
         )
 
     except OrderError as exc:
-        messages.error(
+        return _action_response(
             request,
-            str(exc),
+            order,
+            feedback=str(exc),
+            level="error",
         )
 
-    else:
-        messages.success(
-            request,
-            "Product removed from order.",
-        )
-
-    return redirect(
-        "orders:order_detail",
-        order_id=order.pk,
+    return _action_response(
+        request,
+        order,
+        feedback=(
+            "Product removed from order."
+        ),
     )
 
 
@@ -356,23 +454,20 @@ def order_confirm(
         OrderError,
         InventoryError,
     ) as exc:
-        messages.error(
+        return _action_response(
             request,
-            str(exc),
+            order,
+            feedback=str(exc),
+            level="error",
         )
 
-    else:
-        messages.success(
-            request,
-            (
-                f"{order.order_number} "
-                "confirmed successfully."
-            ),
-        )
-
-    return redirect(
-        "orders:order_detail",
-        order_id=order.pk,
+    return _action_response(
+        request,
+        order,
+        feedback=(
+            f"{order.order_number} "
+            "confirmed successfully."
+        ),
     )
 
 
@@ -397,21 +492,18 @@ def order_cancel(
         )
 
     except OrderError as exc:
-        messages.error(
+        return _action_response(
             request,
-            str(exc),
+            order,
+            feedback=str(exc),
+            level="error",
         )
 
-    else:
-        messages.success(
-            request,
-            (
-                f"{order.order_number} "
-                "cancelled."
-            ),
-        )
-
-    return redirect(
-        "orders:order_detail",
-        order_id=order.pk,
+    return _action_response(
+        request,
+        order,
+        feedback=(
+            f"{order.order_number} "
+            "cancelled."
+        ),
     )

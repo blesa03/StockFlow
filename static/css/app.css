@@ -4036,3 +4036,138 @@ a.main-nav__link:hover {
         }
 
     }
+
+    /* =========================================================
+    HTMX / ORDER INTERACTIONS
+    ========================================================= */
+
+    .order-workspace {
+        position: relative;
+
+        transition:
+            opacity 120ms ease;
+    }
+
+
+    .order-workspace.htmx-swapping {
+        opacity: 0.45;
+    }
+
+
+    .order-workspace.htmx-settling {
+        opacity: 0.75;
+    }
+
+
+    /* REQUEST ACTIVITY */
+
+    .order-activity {
+        position: absolute;
+
+        top: 0;
+        right: 0;
+
+        padding: 6px 9px;
+
+        background: var(--graphite);
+        color: #ffffff;
+
+        border-radius: var(--radius-small);
+
+        font-family:
+            "SFMono-Regular",
+            Consolas,
+            monospace;
+
+        font-size: 8px;
+        font-weight: 700;
+
+        letter-spacing: 0.04em;
+
+        pointer-events: none;
+
+        opacity: 0;
+
+        transition:
+            opacity 100ms ease;
+    }
+
+
+    .order-activity.htmx-request {
+        opacity: 1;
+    }
+
+
+    /* INLINE RESULT */
+
+    .order-inline-feedback {
+        margin-bottom: 17px;
+
+        padding: 10px 12px;
+
+        border:
+            1px solid;
+
+        border-radius: var(--radius-small);
+
+        font-size: 10px;
+        font-weight: 650;
+
+        line-height: 1.45;
+    }
+
+
+    .order-inline-feedback--success {
+        background: var(--success-bg);
+        color: var(--success);
+
+        border-color: #bbf7d0;
+    }
+
+
+    .order-inline-feedback--error {
+        background: var(--danger-bg);
+        color: var(--danger);
+
+        border-color: #fecaca;
+    }
+
+
+    /* HTMX ACTIVE FORM */
+
+    .line-quantity-form.htmx-request,
+    .add-order-line__form.htmx-request,
+    .order-action-panel form.htmx-request {
+        opacity: 0.7;
+    }
+
+
+    /* SLIGHT FEEDBACK ON INTERACTIVE CONTROLS */
+
+    .line-update-button,
+    .table-action--danger,
+    .order-action-panel button,
+    .add-order-line__form button {
+        transition:
+            background 100ms ease,
+            border-color 100ms ease,
+            color 100ms ease,
+            opacity 100ms ease;
+    }
+
+
+    @media (max-width: 700px) {
+
+        .order-activity {
+            position: static;
+
+            width: fit-content;
+
+            margin:
+                0
+                0
+                12px
+                auto;
+        }
+
+    }
