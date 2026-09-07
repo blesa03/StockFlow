@@ -1,0 +1,196 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+Register movement · StockFlow
+{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb">
+
+    <a href="{% url 'inventory:inventory_list' %}">
+        Inventory
+    </a>
+
+    <span>/</span>
+
+    <a href="{% url 'inventory:movement_list' %}">
+        Movements
+    </a>
+
+    <span>/</span>
+
+    <span>
+        New movement
+    </span>
+
+</div>
+
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Inventory operation
+        </div>
+
+        <h1 class="page-heading__title">
+            Register movement
+        </h1>
+
+        <p class="page-heading__description">
+            Register a controlled stock entry,
+            exit or adjustment.
+        </p>
+
+    </div>
+
+</div>
+
+
+{% include "inventory/partials/inventory_tabs.html" %}
+
+
+<form
+    method="post"
+    class="inventory-operation-form"
+>
+
+    {% csrf_token %}
+
+
+    {% if form.non_field_errors %}
+
+        <div class="form-error inventory-form-error">
+
+            {% for error in form.non_field_errors %}
+                <div>
+                    {{ error }}
+                </div>
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    <section class="form-panel">
+
+        <div class="form-panel__header">
+
+            <div class="section-kicker">
+                Stock control
+            </div>
+
+            <h2>
+                Movement information
+            </h2>
+
+        </div>
+
+
+        <div class="entity-form__body">
+
+            {% for field in form %}
+
+                <div class="form-field">
+
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+
+                    {% if field.help_text %}
+
+                        <div class="field-help">
+                            {{ field.help_text }}
+                        </div>
+
+                    {% endif %}
+
+
+                    {% for error in field.errors %}
+
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <div class="inventory-operation-guide">
+
+            <div>
+
+                <strong>
+                    Entry
+                </strong>
+
+                <span>
+                    Adds units to current stock.
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    Exit
+                </strong>
+
+                <span>
+                    Removes units. Stock can never become negative.
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    Adjustment
+                </strong>
+
+                <span>
+                    Sets the exact final stock quantity.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a
+                href="{% url 'inventory:movement_list' %}"
+                class="button button--secondary"
+            >
+                Cancel
+            </a>
+
+
+            <button
+                type="submit"
+                class="button button--primary"
+            >
+                Register movement
+            </button>
+
+        </div>
+
+    </section>
+
+</form>
+
+{% endblock %}

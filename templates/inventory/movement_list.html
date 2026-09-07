@@ -1,0 +1,327 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+Stock movements · StockFlow
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Traceability
+        </div>
+
+        <h1 class="page-heading__title">
+            Stock movements
+        </h1>
+
+        <p class="page-heading__description">
+            Complete history of inventory entries,
+            exits and adjustments.
+        </p>
+
+    </div>
+
+
+    {% if perms.inventory.manage_stock %}
+
+        <a
+            href="{% url 'inventory:movement_create' %}"
+            class="button button--primary"
+        >
+            + Register movement
+        </a>
+
+    {% endif %}
+
+</div>
+
+
+{% include "inventory/partials/inventory_tabs.html" %}
+
+
+<section class="catalog-panel">
+
+    <form
+        method="get"
+        class="movement-filters"
+    >
+
+        <input
+            type="search"
+            name="q"
+            value="{{ filters.q }}"
+            placeholder="SKU, product, order or reason..."
+        >
+
+
+        <select name="type">
+
+            <option value="">
+                All movement types
+            </option>
+
+            {% for value, label in movement_types %}
+
+                <option
+                    value="{{ value }}"
+                    {% if filters.type == value %}
+                        selected
+                    {% endif %}
+                >
+                    {{ label }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <button
+            type="submit"
+            class="button button--secondary"
+        >
+            Apply
+        </button>
+
+
+        {% if filters.q or filters.type %}
+
+            <a
+                href="{% url 'inventory:movement_list' %}"
+                class="filter-clear"
+            >
+                Clear
+            </a>
+
+        {% endif %}
+
+    </form>
+
+
+    {% if page.object_list %}
+
+        <div class="table-wrapper">
+
+            <table class="operations-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Date</th>
+                        <th>SKU</th>
+                        <th>Product</th>
+                        <th>Type</th>
+                        <th class="table-number">
+                            Change
+                        </th>
+                        <th class="table-number">
+                            Before
+                        </th>
+                        <th class="table-number">
+                            After
+                        </th>
+                        <th>Source</th>
+                        <th>Reason</th>
+                        <th>User</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for movement in page %}
+
+                        <tr>
+
+                            <td class="movement-date">
+                                {{ movement.created_at|date:"d M Y H:i" }}
+                            </td>
+
+
+                            <td>
+
+                                <a
+                                    href="{% url 'catalog:product_detail' movement.product.pk %}"
+                                    class="sku"
+                                >
+                                    {{ movement.product.sku }}
+                                </a>
+
+                            </td>
+
+
+                            <td>
+                                {{ movement.product.name }}
+                            </td>
+
+
+                            <td>
+
+                                {% if movement.movement_type == "ENTRY" %}
+
+                                    <span class="movement-type movement-type--entry">
+                                        Entry
+                                    </span>
+
+                                {% elif movement.movement_type == "EXIT" %}
+
+                                    <span class="movement-type movement-type--exit">
+                                        Exit
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="movement-type movement-type--adjustment">
+                                        Adjustment
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="table-number">
+
+                                <span
+                                    class="
+                                        movement-delta
+
+                                        {% if movement.quantity_delta > 0 %}
+                                            movement-delta--positive
+                                        {% else %}
+                                            movement-delta--negative
+                                        {% endif %}
+                                    "
+                                >
+
+                                    {% if movement.quantity_delta > 0 %}
+                                        +{{ movement.quantity_delta }}
+                                    {% else %}
+                                        {{ movement.quantity_delta }}
+                                    {% endif %}
+
+                                </span>
+
+                            </td>
+
+
+                            <td class="table-number">
+                                {{ movement.quantity_before }}
+                            </td>
+
+
+                            <td class="table-number">
+                                {{ movement.quantity_after }}
+                            </td>
+
+
+                            <td>
+
+                                {% if movement.order %}
+
+                                    <span class="movement-source movement-source--order">
+                                        {{ movement.order.order_number }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="movement-source">
+                                        Manual
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="movement-reason">
+                                {{ movement.reason }}
+                            </td>
+
+
+                            <td>
+
+                                {% if movement.created_by %}
+                                    {{ movement.created_by.username }}
+                                {% else %}
+                                    —
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        {% if page.paginator.num_pages > 1 %}
+
+            <div class="pagination">
+
+                <div class="pagination__summary">
+                    Page {{ page.number }}
+                    of {{ page.paginator.num_pages }}
+                </div>
+
+
+                <div class="pagination__actions">
+
+                    {% if page.has_previous %}
+
+                        <a
+                            href="?page={{ page.previous_page_number }}&q={{ filters.q }}&type={{ filters.type }}"
+                            class="button button--secondary button--small"
+                        >
+                            Previous
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if page.has_next %}
+
+                        <a
+                            href="?page={{ page.next_page_number }}&q={{ filters.q }}&type={{ filters.type }}"
+                            class="button button--secondary button--small"
+                        >
+                            Next
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    {% else %}
+
+        <div class="catalog-empty">
+
+            <div class="catalog-empty__title">
+                No movements found
+            </div>
+
+            <p>
+                Inventory operations will appear here.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

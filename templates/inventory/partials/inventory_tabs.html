@@ -1,0 +1,38 @@
+<nav class="catalog-tabs">
+
+    {% if perms.inventory.view_inventorybalance %}
+
+        <a
+            href="{% url 'inventory:inventory_list' %}"
+            class="
+                catalog-tabs__link
+
+                {% if inventory_section == 'balances' %}
+                    catalog-tabs__link--active
+                {% endif %}
+            "
+        >
+            Stock
+        </a>
+
+    {% endif %}
+
+
+    {% if perms.inventory.view_stockmovement %}
+
+        <a
+            href="{% url 'inventory:movement_list' %}"
+            class="
+                catalog-tabs__link
+
+                {% if inventory_section == 'movements' %}
+                    catalog-tabs__link--active
+                {% endif %}
+            "
+        >
+            Movements
+        </a>
+
+    {% endif %}
+
+</nav>

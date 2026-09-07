@@ -30,4 +30,9 @@ urlpatterns = [
         "",
         include("apps.catalog.urls"),
     ),
+
+    path(
+        "",
+        include("apps.inventory.urls"),
+    ),
 ]

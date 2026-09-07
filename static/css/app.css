@@ -2033,4 +2033,435 @@ a.main-nav__link:hover {
 
     }
 
-}
+    /* =========================================================
+    INVENTORY
+    ========================================================= */
+
+    .inventory-summary {
+        display: grid;
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
+        margin-bottom: 18px;
+
+        background: var(--graphite);
+
+        border-radius: var(--radius-medium);
+
+        overflow: hidden;
+    }
+
+
+    .inventory-summary__item {
+        position: relative;
+
+        padding: 18px 20px;
+    }
+
+
+    .inventory-summary__item:not(:last-child)::after {
+        content: "";
+
+        position: absolute;
+
+        top: 14px;
+        right: 0;
+        bottom: 14px;
+
+        width: 1px;
+
+        background:
+            rgba(255, 255, 255, 0.12);
+    }
+
+
+    .inventory-summary__item span {
+        display: block;
+
+        color: #aeb7b2;
+
+        font-size: 9px;
+        font-weight: 800;
+
+        letter-spacing: 0.07em;
+
+        text-transform: uppercase;
+    }
+
+
+    .inventory-summary__item strong {
+        display: block;
+
+        margin-top: 7px;
+
+        color: #ffffff;
+
+        font-size: 24px;
+        font-weight: 800;
+    }
+
+
+    .inventory-summary__item .metric-warning {
+        color: #fbbf24;
+    }
+
+
+    .inventory-summary__item .metric-danger {
+        color: #f87171;
+    }
+
+
+    /* INVENTORY FILTERS */
+
+    .inventory-filters {
+        display: grid;
+
+        grid-template-columns:
+            minmax(240px, 1fr)
+            180px
+            160px
+            130px
+            auto
+            auto;
+
+        align-items: center;
+
+        gap: 9px;
+
+        padding: 14px 16px;
+
+        background: var(--surface-secondary);
+
+        border-bottom:
+            1px solid
+            var(--border);
+    }
+
+
+    .inventory-filters input,
+    .inventory-filters select,
+    .movement-filters input,
+    .movement-filters select {
+        height: 36px;
+
+        padding: 0 10px;
+
+        background: var(--surface);
+
+        border:
+            1px solid
+            var(--border-strong);
+
+        border-radius: var(--radius-small);
+
+        color: var(--text);
+
+        font-size: 11px;
+
+        outline: none;
+    }
+
+
+    .inventory-filters input:focus,
+    .inventory-filters select:focus,
+    .movement-filters input:focus,
+    .movement-filters select:focus {
+        border-color: var(--brand);
+
+        box-shadow:
+            0 0 0 2px
+            rgba(234, 88, 12, 0.10);
+    }
+
+
+    .inventory-quantity {
+        font-family:
+            "SFMono-Regular",
+            Consolas,
+            monospace;
+
+        font-size: 13px !important;
+        font-weight: 800;
+    }
+
+
+    .inventory-updated,
+    .movement-date {
+        color: var(--text-muted);
+
+        font-size: 10px !important;
+
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+    MOVEMENT HISTORY
+    ========================================================= */
+
+    .movement-filters {
+        display: grid;
+
+        grid-template-columns:
+            minmax(300px, 1fr)
+            190px
+            auto
+            auto;
+
+        align-items: center;
+
+        gap: 9px;
+
+        padding: 14px 16px;
+
+        background: var(--surface-secondary);
+
+        border-bottom:
+            1px solid
+            var(--border);
+    }
+
+
+    .movement-type {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        min-width: 68px;
+        height: 23px;
+
+        padding: 0 7px;
+
+        border-radius: 3px;
+
+        font-size: 9px;
+        font-weight: 800;
+
+        letter-spacing: 0.04em;
+
+        text-transform: uppercase;
+    }
+
+
+    .movement-type--entry {
+        background: var(--success-bg);
+        color: var(--success);
+    }
+
+
+    .movement-type--exit {
+        background: var(--danger-bg);
+        color: var(--danger);
+    }
+
+
+    .movement-type--adjustment {
+        background: var(--info-bg);
+        color: var(--info);
+    }
+
+
+    .movement-source {
+        color: var(--text-muted);
+
+        font-family:
+            "SFMono-Regular",
+            Consolas,
+            monospace;
+
+        font-size: 9px;
+    }
+
+
+    .movement-source--order {
+        color: var(--brand-dark);
+
+        font-weight: 700;
+    }
+
+
+    .movement-reason {
+        min-width: 180px;
+        max-width: 280px;
+
+        color: var(--text-secondary);
+    }
+
+
+    /* =========================================================
+    INVENTORY OPERATION FORM
+    ========================================================= */
+
+    .inventory-operation-form {
+        width: 100%;
+        max-width: 720px;
+    }
+
+
+    .inventory-form-error {
+        max-width: 720px;
+    }
+
+
+    .inventory-operation-guide {
+        display: grid;
+
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+        margin:
+            0
+            22px;
+
+        border:
+            1px solid
+            var(--border);
+
+        background: var(--surface-secondary);
+    }
+
+
+    .inventory-operation-guide > div {
+        padding: 14px;
+    }
+
+
+    .inventory-operation-guide > div:not(:last-child) {
+        border-right:
+            1px solid
+            var(--border);
+    }
+
+
+    .inventory-operation-guide strong {
+        display: block;
+
+        color: var(--graphite);
+
+        font-size: 10px;
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.06em;
+    }
+
+
+    .inventory-operation-guide span {
+        display: block;
+
+        margin-top: 5px;
+
+        color: var(--text-muted);
+
+        font-size: 9px;
+
+        line-height: 1.5;
+    }
+
+
+    /* =========================================================
+    INVENTORY RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 1000px) {
+
+        .inventory-filters {
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+        }
+
+
+        .inventory-filters input {
+            grid-column:
+                1 / -1;
+        }
+
+    }
+
+
+    @media (max-width: 800px) {
+
+        .inventory-summary {
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+        }
+
+
+        .inventory-summary__item:nth-child(2)::after {
+            display: none;
+        }
+
+
+        .inventory-summary__item:nth-child(-n + 2) {
+            border-bottom:
+                1px solid
+                rgba(255, 255, 255, 0.12);
+        }
+
+
+        .movement-filters {
+            grid-template-columns:
+                1fr
+                1fr;
+        }
+
+
+        .movement-filters input {
+            grid-column:
+                1 / -1;
+        }
+
+    }
+
+
+    @media (max-width: 600px) {
+
+        .inventory-summary {
+            grid-template-columns: 1fr;
+        }
+
+
+        .inventory-summary__item {
+            border-bottom:
+                1px solid
+                rgba(255, 255, 255, 0.12);
+        }
+
+
+        .inventory-summary__item:last-child {
+            border-bottom: 0;
+        }
+
+
+        .inventory-summary__item::after {
+            display: none;
+        }
+
+
+        .inventory-filters,
+        .movement-filters {
+            grid-template-columns: 1fr;
+        }
+
+
+        .inventory-filters input,
+        .movement-filters input {
+            grid-column: auto;
+        }
+
+
+        .inventory-operation-guide {
+            grid-template-columns: 1fr;
+        }
+
+
+        .inventory-operation-guide > div:not(:last-child) {
+            border-right: 0;
+
+            border-bottom:
+                1px solid
+                var(--border);
+        }
+
+    }

@@ -1,0 +1,437 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+Inventory · StockFlow
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Operations
+        </div>
+
+        <h1 class="page-heading__title">
+            Inventory
+        </h1>
+
+        <p class="page-heading__description">
+            Current stock position and operational thresholds.
+        </p>
+
+    </div>
+
+
+    {% if perms.inventory.manage_stock %}
+
+        <a
+            href="{% url 'inventory:movement_create' %}"
+            class="button button--primary"
+        >
+            + Register movement
+        </a>
+
+    {% endif %}
+
+</div>
+
+
+{% include "inventory/partials/inventory_tabs.html" %}
+
+
+<section class="inventory-summary">
+
+    <div class="inventory-summary__item">
+
+        <span>
+            Tracked products
+        </span>
+
+        <strong>
+            {{ metrics.products }}
+        </strong>
+
+    </div>
+
+
+    <div class="inventory-summary__item">
+
+        <span>
+            Units on hand
+        </span>
+
+        <strong>
+            {{ metrics.total_units }}
+        </strong>
+
+    </div>
+
+
+    <div class="inventory-summary__item">
+
+        <span>
+            Low stock
+        </span>
+
+        <strong
+            class="
+                {% if metrics.low_stock %}
+                    metric-warning
+                {% endif %}
+            "
+        >
+            {{ metrics.low_stock }}
+        </strong>
+
+    </div>
+
+
+    <div class="inventory-summary__item">
+
+        <span>
+            Out of stock
+        </span>
+
+        <strong
+            class="
+                {% if metrics.out_of_stock %}
+                    metric-danger
+                {% endif %}
+            "
+        >
+            {{ metrics.out_of_stock }}
+        </strong>
+
+    </div>
+
+</section>
+
+
+<section class="catalog-panel">
+
+    <form
+        method="get"
+        class="inventory-filters"
+    >
+
+        <input
+            type="search"
+            name="q"
+            value="{{ filters.q }}"
+            placeholder="Search SKU or product..."
+        >
+
+
+        <select name="category">
+
+            <option value="">
+                All categories
+            </option>
+
+            {% for category in categories %}
+
+                <option
+                    value="{{ category.pk }}"
+                    {% if filters.category == category.pk|stringformat:"s" %}
+                        selected
+                    {% endif %}
+                >
+                    {{ category.name }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <select name="status">
+
+            <option value="">
+                All stock states
+            </option>
+
+            <option
+                value="healthy"
+                {% if filters.status == "healthy" %}
+                    selected
+                {% endif %}
+            >
+                In stock
+            </option>
+
+            <option
+                value="low"
+                {% if filters.status == "low" %}
+                    selected
+                {% endif %}
+            >
+                Low stock
+            </option>
+
+            <option
+                value="out"
+                {% if filters.status == "out" %}
+                    selected
+                {% endif %}
+            >
+                Out of stock
+            </option>
+
+        </select>
+
+
+        <select name="active">
+
+            <option
+                value="active"
+                {% if filters.active == "active" %}
+                    selected
+                {% endif %}
+            >
+                Active
+            </option>
+
+            <option
+                value="inactive"
+                {% if filters.active == "inactive" %}
+                    selected
+                {% endif %}
+            >
+                Inactive
+            </option>
+
+            <option
+                value="all"
+                {% if filters.active == "all" %}
+                    selected
+                {% endif %}
+            >
+                All
+            </option>
+
+        </select>
+
+
+        <button
+            type="submit"
+            class="button button--secondary"
+        >
+            Apply
+        </button>
+
+
+        {% if filters.q or filters.category or filters.status or filters.active != "active" %}
+
+            <a
+                href="{% url 'inventory:inventory_list' %}"
+                class="filter-clear"
+            >
+                Clear
+            </a>
+
+        {% endif %}
+
+    </form>
+
+
+    {% if page.object_list %}
+
+        <div class="table-wrapper">
+
+            <table class="operations-table">
+
+                <thead>
+
+                    <tr>
+                        <th>SKU</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th class="table-number">
+                            Stock
+                        </th>
+                        <th class="table-number">
+                            Min.
+                        </th>
+                        <th>Status</th>
+                        <th>Updated</th>
+
+                        {% if perms.inventory.manage_stock %}
+                            <th></th>
+                        {% endif %}
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for balance in page %}
+
+                        <tr>
+
+                            <td>
+
+                                <a
+                                    href="{% url 'catalog:product_detail' balance.product.pk %}"
+                                    class="sku"
+                                >
+                                    {{ balance.product.sku }}
+                                </a>
+
+                            </td>
+
+
+                            <td>
+
+                                <a
+                                    href="{% url 'catalog:product_detail' balance.product.pk %}"
+                                    class="entity-name"
+                                >
+                                    {{ balance.product.name }}
+                                </a>
+
+                                {% if not balance.product.active %}
+
+                                    <div class="product-inactive">
+                                        Inactive
+                                    </div>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+                                {{ balance.product.category.name }}
+                            </td>
+
+
+                            <td class="table-number inventory-quantity">
+                                {{ balance.quantity }}
+                            </td>
+
+
+                            <td class="table-number">
+                                {{ balance.product.minimum_stock }}
+                            </td>
+
+
+                            <td>
+
+                                {% if balance.stock_status == "out" %}
+
+                                    <span class="status status--out">
+                                        Out
+                                    </span>
+
+                                {% elif balance.stock_status == "low" %}
+
+                                    <span class="status status--low">
+                                        Low
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status status--healthy">
+                                        In stock
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="inventory-updated">
+                                {{ balance.updated_at|date:"d M Y H:i" }}
+                            </td>
+
+
+                            {% if perms.inventory.manage_stock %}
+
+                                <td class="entity-action">
+
+                                    <a
+                                        href="{% url 'inventory:movement_create' %}?product={{ balance.product.pk }}"
+                                        class="table-action"
+                                    >
+                                        Move
+                                    </a>
+
+                                </td>
+
+                            {% endif %}
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        {% if page.paginator.num_pages > 1 %}
+
+            <div class="pagination">
+
+                <div class="pagination__summary">
+                    Page {{ page.number }}
+                    of {{ page.paginator.num_pages }}
+                </div>
+
+
+                <div class="pagination__actions">
+
+                    {% if page.has_previous %}
+
+                        <a
+                            href="?page={{ page.previous_page_number }}&q={{ filters.q }}&category={{ filters.category }}&status={{ filters.status }}&active={{ filters.active }}"
+                            class="button button--secondary button--small"
+                        >
+                            Previous
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if page.has_next %}
+
+                        <a
+                            href="?page={{ page.next_page_number }}&q={{ filters.q }}&category={{ filters.category }}&status={{ filters.status }}&active={{ filters.active }}"
+                            class="button button--secondary button--small"
+                        >
+                            Next
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    {% else %}
+
+        <div class="catalog-empty">
+
+            <div class="catalog-empty__title">
+                No inventory found
+            </div>
+
+            <p>
+                Try changing the current filters.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

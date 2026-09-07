@@ -64,9 +64,20 @@
 
 
             {% if perms.inventory.view_inventorybalance %}
-                <span class="main-nav__link main-nav__link--disabled">
+
+                <a
+                    href="{% url 'inventory:inventory_list' %}"
+                    class="
+                        main-nav__link
+
+                        {% if request.resolver_match.namespace == 'inventory' %}
+                            main-nav__link--active
+                        {% endif %}
+                    "
+                >
                     Inventory
-                </span>
+                </a>
+
             {% endif %}
 
 
