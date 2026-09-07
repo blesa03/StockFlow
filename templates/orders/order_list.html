@@ -186,6 +186,7 @@ Orders · StockFlow
                         <th>Status</th>
                         <th>Created by</th>
                         <th>Created</th>
+                        <th></th>
                     </tr>
 
                 </thead>
@@ -199,9 +200,12 @@ Orders · StockFlow
 
                             <td>
 
-                                <span class="order-number">
+                                <a
+                                    href="{% url 'orders:order_detail' order.pk %}"
+                                    class="order-number"
+                                >
                                     {{ order.order_number }}
-                                </span>
+                                </a>
 
                             </td>
 
@@ -281,6 +285,18 @@ Orders · StockFlow
 
                             <td class="order-date">
                                 {{ order.created_at|date:"d M Y H:i" }}
+                            </td>
+
+
+                            <td class="entity-action">
+
+                                <a
+                                    href="{% url 'orders:order_detail' order.pk %}"
+                                    class="table-action"
+                                >
+                                    View
+                                </a>
+
                             </td>
 
                         </tr>

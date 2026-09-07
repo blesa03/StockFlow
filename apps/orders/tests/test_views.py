@@ -244,15 +244,18 @@ class OrderViewTests(TestCase):
             },
         )
 
+        order = Order.objects.get(
+            customer_name="Contoso",
+        )
+
         self.assertRedirects(
             response,
             reverse(
-                "orders:order_list"
+                "orders:order_detail",
+                args=[
+                    order.pk,
+                ],
             ),
-        )
-
-        order = Order.objects.get(
-            customer_name="Contoso",
         )
 
         self.assertEqual(

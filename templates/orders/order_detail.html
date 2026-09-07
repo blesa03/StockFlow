@@ -1,0 +1,535 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+{{ order.order_number }} · StockFlow
+{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb">
+
+    <a href="{% url 'orders:order_list' %}">
+        Orders
+    </a>
+
+    <span>/</span>
+
+    <span>
+        {{ order.order_number }}
+    </span>
+
+</div>
+
+
+<div class="order-detail-heading">
+
+    <div>
+
+        <div class="order-detail-heading__number">
+            {{ order.order_number }}
+        </div>
+
+        <h1>
+            {{ order.customer_name }}
+        </h1>
+
+
+        <div class="order-detail-heading__meta">
+
+            {% if order.status == "DRAFT" %}
+
+                <span class="order-status order-status--draft">
+                    Draft
+                </span>
+
+            {% elif order.status == "CONFIRMED" %}
+
+                <span class="order-status order-status--confirmed">
+                    Confirmed
+                </span>
+
+            {% else %}
+
+                <span class="order-status order-status--cancelled">
+                    Cancelled
+                </span>
+
+            {% endif %}
+
+
+            <span>
+                Created
+                {{ order.created_at|date:"d M Y H:i" }}
+            </span>
+
+
+            {% if order.created_by %}
+
+                <span>
+                    by
+
+                    {% if order.created_by.get_full_name %}
+                        {{ order.created_by.get_full_name }}
+                    {% else %}
+                        {{ order.created_by.username }}
+                    {% endif %}
+                </span>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="order-detail-grid">
+
+    <main>
+
+        <section class="order-lines-panel">
+
+            <div class="order-lines-panel__header">
+
+                <div>
+
+                    <div class="section-kicker">
+                        Order lines
+                    </div>
+
+                    <h2>
+                        Products
+                    </h2>
+
+                </div>
+
+
+                <div class="order-lines-panel__count">
+                    {{ order.items.all|length }}
+                    line{{ order.items.all|length|pluralize }}
+                </div>
+
+            </div>
+
+
+            {% if order.items.all %}
+
+                <div class="table-wrapper">
+
+                    <table class="operations-table order-lines-table">
+
+                        <thead>
+
+                            <tr>
+                                <th>SKU</th>
+                                <th>Product</th>
+                                <th class="table-number">
+                                    Available
+                                </th>
+                                <th class="table-number">
+                                    Unit price
+                                </th>
+                                <th>
+                                    Quantity
+                                </th>
+                                <th class="table-number">
+                                    Line total
+                                </th>
+
+                                {% if order.is_editable %}
+                                    <th></th>
+                                {% endif %}
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for item in order.items.all %}
+
+                                <tr>
+
+                                    <td>
+
+                                        <a
+                                            href="{% url 'catalog:product_detail' item.product.pk %}"
+                                            class="sku"
+                                        >
+                                            {{ item.product.sku }}
+                                        </a>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <div class="entity-name">
+                                            {{ item.product.name }}
+                                        </div>
+
+                                        <div class="table-secondary">
+                                            {{ item.product.category.name }}
+                                        </div>
+
+                                    </td>
+
+
+                                    <td class="table-number">
+
+                                        <span class="available-stock">
+                                            {{ item.product.inventory_balance.quantity }}
+                                        </span>
+
+
+                                        {% if item.quantity > item.product.inventory_balance.quantity %}
+
+                                            <div class="stock-shortage-label">
+                                                shortage
+                                            </div>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td class="table-number order-line-price">
+                                        €{{ item.unit_price|floatformat:2 }}
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if order.is_editable and perms.orders.change_orderitem %}
+
+                                            <form
+                                                method="post"
+                                                action="{% url 'orders:order_item_update' order.pk item.pk %}"
+                                                class="line-quantity-form"
+                                            >
+
+                                                {% csrf_token %}
+
+                                                <input
+                                                    type="number"
+                                                    name="quantity"
+                                                    value="{{ item.quantity }}"
+                                                    min="1"
+                                                    required
+                                                >
+
+                                                <button
+                                                    type="submit"
+                                                    class="line-update-button"
+                                                >
+                                                    Update
+                                                </button>
+
+                                            </form>
+
+                                        {% else %}
+
+                                            <span class="order-line-quantity">
+                                                {{ item.quantity }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td class="table-number order-line-total">
+                                        €{{ item.line_total|floatformat:2 }}
+                                    </td>
+
+
+                                    {% if order.is_editable %}
+
+                                        <td class="order-line-action">
+
+                                            {% if perms.orders.change_orderitem %}
+
+                                                <form
+                                                    method="post"
+                                                    action="{% url 'orders:order_item_remove' order.pk item.pk %}"
+                                                >
+
+                                                    {% csrf_token %}
+
+                                                    <button
+                                                        type="submit"
+                                                        class="table-action table-action--danger"
+                                                    >
+                                                        Remove
+                                                    </button>
+
+                                                </form>
+
+                                            {% endif %}
+
+                                        </td>
+
+                                    {% endif %}
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div class="order-total-bar">
+
+                    <span>
+                        Order total
+                    </span>
+
+                    <strong>
+                        €{{ order.total|floatformat:2 }}
+                    </strong>
+
+                </div>
+
+            {% else %}
+
+                <div class="order-lines-empty">
+
+                    <div class="order-lines-empty__title">
+                        Empty draft
+                    </div>
+
+                    <p>
+                        Add the first product to this order.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+        {% if order.is_editable and perms.orders.add_orderitem %}
+
+            <section class="add-order-line">
+
+                <div class="add-order-line__header">
+
+                    <div class="section-kicker">
+                        Draft editor
+                    </div>
+
+                    <h2>
+                        Add product
+                    </h2>
+
+                </div>
+
+
+                <form
+                    method="post"
+                    class="add-order-line__form"
+                >
+
+                    {% csrf_token %}
+
+
+                    {% if add_item_form.non_field_errors %}
+
+                        <div class="form-error">
+                            {{ add_item_form.non_field_errors }}
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="form-field">
+
+                        <label for="{{ add_item_form.product.id_for_label }}">
+                            Product
+                        </label>
+
+                        {{ add_item_form.product }}
+
+                        {% for error in add_item_form.product.errors %}
+
+                            <div class="field-error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="form-field">
+
+                        <label for="{{ add_item_form.quantity.id_for_label }}">
+                            Quantity
+                        </label>
+
+                        {{ add_item_form.quantity }}
+
+                        {% for error in add_item_form.quantity.errors %}
+
+                            <div class="field-error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="button button--primary"
+                    >
+                        Add product
+                    </button>
+
+                </form>
+
+
+                <div class="draft-stock-note">
+                    Adding or editing draft lines does not reserve
+                    or modify inventory. Stock is validated only
+                    when the order is confirmed.
+                </div>
+
+            </section>
+
+        {% endif %}
+
+    </main>
+
+
+    <aside class="order-sidebar">
+
+        <section class="order-info-panel">
+
+            <div class="order-info-panel__header">
+
+                <div class="section-kicker">
+                    Order
+                </div>
+
+                <h2>
+                    Information
+                </h2>
+
+            </div>
+
+
+            <dl class="order-info-list">
+
+                <div>
+                    <dt>Customer</dt>
+                    <dd>
+                        {{ order.customer_name }}
+                    </dd>
+                </div>
+
+
+                <div>
+                    <dt>Status</dt>
+                    <dd>
+                        {{ order.get_status_display }}
+                    </dd>
+                </div>
+
+
+                <div>
+                    <dt>Created</dt>
+                    <dd>
+                        {{ order.created_at|date:"d M Y H:i" }}
+                    </dd>
+                </div>
+
+
+                {% if order.confirmed_at %}
+
+                    <div>
+                        <dt>Confirmed</dt>
+                        <dd>
+                            {{ order.confirmed_at|date:"d M Y H:i" }}
+                        </dd>
+                    </div>
+
+                {% endif %}
+
+            </dl>
+
+        </section>
+
+
+        <section class="order-info-panel">
+
+            <div class="order-info-panel__header">
+
+                <div class="section-kicker">
+                    Notes
+                </div>
+
+                <h2>
+                    Internal notes
+                </h2>
+
+            </div>
+
+
+            <div class="order-notes">
+
+                {% if order.notes %}
+                    {{ order.notes|linebreaksbr }}
+                {% else %}
+                    <span class="text-muted">
+                        No notes for this order.
+                    </span>
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        {% if order.is_editable %}
+
+            <div class="order-draft-state">
+
+                <strong>
+                    Draft order
+                </strong>
+
+                <span>
+                    You can modify its lines without affecting stock.
+                </span>
+
+            </div>
+
+        {% else %}
+
+            <div class="order-locked-state">
+
+                <strong>
+                    Order locked
+                </strong>
+
+                <span>
+                    Lines can no longer be modified.
+                </span>
+
+            </div>
+
+        {% endif %}
+
+    </aside>
+
+</div>
+
+{% endblock %}
