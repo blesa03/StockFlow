@@ -57,6 +57,17 @@ class Order(models.Model):
     class Meta:
         ordering = ["-created_at"]  # noqa: RUF012
 
+        permissions = [  # noqa: RUF012
+            (
+                "confirm_order",
+                "Can confirm orders",
+            ),
+            (
+                "cancel_order",
+                "Can cancel draft orders",
+            ),
+        ]
+
     def save(self, *args, **kwargs):
         creating = self._state.adding
 

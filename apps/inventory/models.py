@@ -72,6 +72,14 @@ class StockMovement(models.Model):
 
     class Meta:
         ordering = ["-created_at"]  # noqa: RUF012
+
+        permissions = [  # noqa: RUF012
+            (
+                "manage_stock",
+                "Can register and adjust stock",
+            ),
+        ]
+
         constraints = [  # noqa: RUF012
             models.CheckConstraint(
                 condition=~models.Q(quantity_delta=0),
