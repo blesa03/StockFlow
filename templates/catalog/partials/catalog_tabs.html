@@ -1,0 +1,47 @@
+<nav class="catalog-tabs">
+
+    {% if perms.catalog.view_product %}
+        <a
+            href="{% url 'catalog:product_list' %}"
+            class="
+                catalog-tabs__link
+                {% if catalog_section == 'products' %}
+                    catalog-tabs__link--active
+                {% endif %}
+            "
+        >
+            Products
+        </a>
+    {% endif %}
+
+
+    {% if perms.catalog.view_category %}
+        <a
+            href="{% url 'catalog:category_list' %}"
+            class="
+                catalog-tabs__link
+                {% if catalog_section == 'categories' %}
+                    catalog-tabs__link--active
+                {% endif %}
+            "
+        >
+            Categories
+        </a>
+    {% endif %}
+
+
+    {% if perms.catalog.view_supplier %}
+        <a
+            href="{% url 'catalog:supplier_list' %}"
+            class="
+                catalog-tabs__link
+                {% if catalog_section == 'suppliers' %}
+                    catalog-tabs__link--active
+                {% endif %}
+            "
+        >
+            Suppliers
+        </a>
+    {% endif %}
+
+</nav>

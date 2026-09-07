@@ -1,6 +1,7 @@
 from django.db.models import (
     Case,
     CharField,
+    Count,
     F,
     IntegerField,
     Q,
@@ -9,7 +10,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce
 
-from .models import Product
+from .models import Category, Product, Supplier
 
 
 def with_stock_information(queryset):
@@ -43,12 +44,9 @@ def get_products(
     stock_status="",
     active="active",
 ):
-    queryset = (
-        Product.objects
-        .select_related(
-            "category",
-            "supplier",
-        )
+    queryset = Product.objects.select_related(
+        "category",
+        "supplier",
     )
 
     queryset = with_stock_information(queryset)
@@ -95,9 +93,7 @@ def get_products(
             active=False,
         )
 
-    return queryset.order_by(
-        "name",
-    )
+    return queryset.order_by("name")
 
 
 def get_product_with_stock(product_id):
@@ -110,3 +106,64 @@ def get_product_with_stock(product_id):
         )
         .get(pk=product_id)
     )
+
+
+def get_categories(
+    *,
+    search="",
+    active="active",
+):
+    queryset = Category.objects.annotate(
+        product_count=Count(
+            "products",
+        )
+    )
+
+    if search:
+        queryset = queryset.filter(
+            Q(name__icontains=search)
+            | Q(description__icontains=search)
+        )
+
+    if active == "active":
+        queryset = queryset.filter(
+            active=True,
+        )
+
+    elif active == "inactive":
+        queryset = queryset.filter(
+            active=False,
+        )
+
+    return queryset.order_by("name")
+
+
+def get_suppliers(
+    *,
+    search="",
+    active="active",
+):
+    queryset = Supplier.objects.annotate(
+        product_count=Count(
+            "products",
+        )
+    )
+
+    if search:
+        queryset = queryset.filter(
+            Q(name__icontains=search)
+            | Q(email__icontains=search)
+            | Q(phone__icontains=search)
+        )
+
+    if active == "active":
+        queryset = queryset.filter(
+            active=True,
+        )
+
+    elif active == "inactive":
+        queryset = queryset.filter(
+            active=False,
+        )
+
+    return queryset.order_by("name")

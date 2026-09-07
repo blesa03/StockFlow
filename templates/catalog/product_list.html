@@ -1,121 +1,349 @@
-<header class="app-header">
+{% extends "layouts/app.html" %}
 
-    <div class="app-header__inner">
+{% block title %}
+Products · StockFlow
+{% endblock %}
 
-        <div class="brand">
+{% block content %}
 
-            <a
-                href="{% url 'dashboard' %}"
-                class="brand__link"
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Catalog
+        </div>
+
+        <h1 class="page-heading__title">
+            Products
+        </h1>
+
+        <p class="page-heading__description">
+            Product catalog, stock levels and inventory thresholds.
+        </p>
+
+    </div>
+
+
+    {% if perms.catalog.add_product %}
+
+        <a
+            href="{% url 'catalog:product_create' %}"
+            class="button button--primary"
+        >
+            + New product
+        </a>
+
+    {% endif %}
+
+</div>
+
+
+{% include "catalog/partials/catalog_tabs.html" %}
+
+
+<section class="catalog-panel">
+
+    <form
+        method="get"
+        class="catalog-filters"
+    >
+
+        <div class="catalog-search">
+
+            <input
+                type="search"
+                name="q"
+                value="{{ filters.q }}"
+                placeholder="Search SKU or product..."
             >
-
-                <div class="brand__mark">
-                    SF
-                </div>
-
-                <div class="brand__identity">
-
-                    <div class="brand__name">
-                        StockFlow
-                    </div>
-
-                    <div class="brand__subtitle">
-                        Inventory operations
-                    </div>
-
-                </div>
-
-            </a>
 
         </div>
 
 
-        <nav class="main-nav">
+        <select name="category">
+
+            <option value="">
+                All categories
+            </option>
+
+            {% for category in categories %}
+
+                <option
+                    value="{{ category.pk }}"
+                    {% if filters.category == category.pk|stringformat:"s" %}
+                        selected
+                    {% endif %}
+                >
+                    {{ category.name }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <select name="supplier">
+
+            <option value="">
+                All suppliers
+            </option>
+
+            {% for supplier in suppliers %}
+
+                <option
+                    value="{{ supplier.pk }}"
+                    {% if filters.supplier == supplier.pk|stringformat:"s" %}
+                        selected
+                    {% endif %}
+                >
+                    {{ supplier.name }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <select name="status">
+
+            <option value="">
+                All stock states
+            </option>
+
+            <option
+                value="healthy"
+                {% if filters.status == "healthy" %}
+                    selected
+                {% endif %}
+            >
+                In stock
+            </option>
+
+            <option
+                value="low"
+                {% if filters.status == "low" %}
+                    selected
+                {% endif %}
+            >
+                Low stock
+            </option>
+
+            <option
+                value="out"
+                {% if filters.status == "out" %}
+                    selected
+                {% endif %}
+            >
+                Out of stock
+            </option>
+
+        </select>
+
+
+        <select name="active">
+
+            <option
+                value="active"
+                {% if filters.active == "active" %}
+                    selected
+                {% endif %}
+            >
+                Active
+            </option>
+
+            <option
+                value="inactive"
+                {% if filters.active == "inactive" %}
+                    selected
+                {% endif %}
+            >
+                Inactive
+            </option>
+
+            <option
+                value="all"
+                {% if filters.active == "all" %}
+                    selected
+                {% endif %}
+            >
+                All
+            </option>
+
+        </select>
+
+
+        <button
+            type="submit"
+            class="button button--secondary"
+        >
+            Apply
+        </button>
+
+
+        {% if filters.q or filters.category or filters.supplier or filters.status or filters.active != "active" %}
 
             <a
-                href="{% url 'dashboard' %}"
-                class="
-                    main-nav__link
-                    {% if request.resolver_match.url_name == 'dashboard' %}
-                        main-nav__link--active
-                    {% endif %}
-                "
+                href="{% url 'catalog:product_list' %}"
+                class="filter-clear"
             >
-                Overview
+                Clear
             </a>
 
+        {% endif %}
 
-            {% if perms.catalog.view_product %}
-
-                <a
-                    href="{% url 'catalog:product_list' %}"
-                    class="
-                        main-nav__link
-
-                        {% if request.resolver_match.url_name == 'product_list' or request.resolver_match.url_name == 'product_detail' or request.resolver_match.url_name == 'product_create' or request.resolver_match.url_name == 'product_edit' %}
-                            main-nav__link--active
-                        {% endif %}
-                    "
-                >
-                    Products
-                </a>
-
-            {% endif %}
+    </form>
 
 
-            {% if perms.inventory.view_inventorybalance %}
-                <span class="main-nav__link main-nav__link--disabled">
-                    Inventory
-                </span>
-            {% endif %}
+    {% if page.object_list %}
+
+        <div class="table-wrapper">
+
+            <table class="operations-table products-table">
+
+                <thead>
+
+                    <tr>
+                        <th>SKU</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Supplier</th>
+                        <th class="table-number">Stock</th>
+                        <th class="table-number">Min.</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
 
 
-            {% if perms.orders.view_order %}
-                <span class="main-nav__link main-nav__link--disabled">
-                    Orders
-                </span>
-            {% endif %}
+                <tbody>
+
+                    {% for product in page %}
+
+                        <tr
+                            class="clickable-row"
+                            onclick="window.location='{% url 'catalog:product_detail' product.pk %}'"
+                        >
+
+                            <td>
+                                <span class="sku">
+                                    {{ product.sku }}
+                                </span>
+                            </td>
 
 
-            {% if perms.catalog.view_supplier %}
-                <span class="main-nav__link main-nav__link--disabled">
-                    Suppliers
-                </span>
-            {% endif %}
+                            <td>
+
+                                <div class="product-cell__name">
+                                    {{ product.name }}
+                                </div>
+
+                                {% if not product.active %}
+
+                                    <div class="product-inactive">
+                                        Inactive
+                                    </div>
+
+                                {% endif %}
+
+                            </td>
 
 
-            {% if perms.accounts.view_user %}
-                <span class="main-nav__link main-nav__link--disabled">
-                    Users
-                </span>
-            {% endif %}
-
-        </nav>
+                            <td>
+                                {{ product.category.name }}
+                            </td>
 
 
-        <div class="header-user">
+                            <td>
 
-            <div class="header-user__identity">
+                                {% if product.supplier %}
+                                    {{ product.supplier.name }}
+                                {% else %}
+                                    <span class="text-muted">
+                                        —
+                                    </span>
+                                {% endif %}
 
-                <div class="header-user__name">
-                    {% if request.user.get_full_name %}
-                        {{ request.user.get_full_name }}
-                    {% else %}
-                        {{ request.user.username }}
-                    {% endif %}
+                            </td>
+
+
+                            <td class="table-number stock-number">
+                                {{ product.stock_quantity }}
+                            </td>
+
+
+                            <td class="table-number">
+                                {{ product.minimum_stock }}
+                            </td>
+
+
+                            <td>
+
+                                {% if product.stock_status == "out" %}
+
+                                    <span class="status status--out">
+                                        Out
+                                    </span>
+
+                                {% elif product.stock_status == "low" %}
+
+                                    <span class="status status--low">
+                                        Low
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status status--healthy">
+                                        In stock
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        {% if page.paginator.num_pages > 1 %}
+
+            <div class="pagination">
+
+                <div class="pagination__summary">
+                    Page {{ page.number }}
+                    of {{ page.paginator.num_pages }}
                 </div>
 
-                <div class="header-user__role">
 
-                    {% if request.user.is_superuser %}
-                        Superuser
-                    {% else %}
+                <div class="pagination__actions">
 
-                        {% for group in request.user.groups.all %}
-                            {{ group.name }}
-                        {% empty %}
-                            User
-                        {% endfor %}
+                    {% if page.has_previous %}
+
+                        <a
+                            class="button button--secondary button--small"
+                            href="?page={{ page.previous_page_number }}&q={{ filters.q }}&category={{ filters.category }}&supplier={{ filters.supplier }}&status={{ filters.status }}&active={{ filters.active }}"
+                        >
+                            Previous
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if page.has_next %}
+
+                        <a
+                            class="button button--secondary button--small"
+                            href="?page={{ page.next_page_number }}&q={{ filters.q }}&category={{ filters.category }}&supplier={{ filters.supplier }}&status={{ filters.status }}&active={{ filters.active }}"
+                        >
+                            Next
+                        </a>
 
                     {% endif %}
 
@@ -123,23 +351,24 @@
 
             </div>
 
+        {% endif %}
 
-            <form
-                method="post"
-                action="{% url 'logout' %}"
-            >
-                {% csrf_token %}
+    {% else %}
 
-                <button
-                    type="submit"
-                    class="button button--secondary button--small"
-                >
-                    Sign out
-                </button>
-            </form>
+        <div class="catalog-empty">
+
+            <div class="catalog-empty__title">
+                No products found
+            </div>
+
+            <p>
+                Try changing the current filters.
+            </p>
 
         </div>
 
-    </div>
+    {% endif %}
 
-</header>
+</section>
+
+{% endblock %}

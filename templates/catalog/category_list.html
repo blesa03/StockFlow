@@ -1,0 +1,225 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+Categories · StockFlow
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Catalog
+        </div>
+
+        <h1 class="page-heading__title">
+            Categories
+        </h1>
+
+        <p class="page-heading__description">
+            Organize products into operational catalog groups.
+        </p>
+
+    </div>
+
+
+    {% if perms.catalog.add_category %}
+
+        <a
+            href="{% url 'catalog:category_create' %}"
+            class="button button--primary"
+        >
+            + New category
+        </a>
+
+    {% endif %}
+
+</div>
+
+
+{% include "catalog/partials/catalog_tabs.html" %}
+
+
+<section class="catalog-panel">
+
+    <form
+        method="get"
+        class="entity-filters"
+    >
+
+        <input
+            type="search"
+            name="q"
+            value="{{ filters.q }}"
+            placeholder="Search categories..."
+        >
+
+
+        <select name="active">
+
+            <option
+                value="active"
+                {% if filters.active == "active" %}
+                    selected
+                {% endif %}
+            >
+                Active
+            </option>
+
+            <option
+                value="inactive"
+                {% if filters.active == "inactive" %}
+                    selected
+                {% endif %}
+            >
+                Inactive
+            </option>
+
+            <option
+                value="all"
+                {% if filters.active == "all" %}
+                    selected
+                {% endif %}
+            >
+                All
+            </option>
+
+        </select>
+
+
+        <button
+            type="submit"
+            class="button button--secondary"
+        >
+            Apply
+        </button>
+
+
+        {% if filters.q or filters.active != "active" %}
+
+            <a
+                href="{% url 'catalog:category_list' %}"
+                class="filter-clear"
+            >
+                Clear
+            </a>
+
+        {% endif %}
+
+    </form>
+
+
+    {% if categories %}
+
+        <div class="table-wrapper">
+
+            <table class="operations-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th class="table-number">Products</th>
+                        <th>Status</th>
+
+                        {% if perms.catalog.change_category %}
+                            <th></th>
+                        {% endif %}
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for category in categories %}
+
+                        <tr>
+
+                            <td>
+                                <div class="entity-name">
+                                    {{ category.name }}
+                                </div>
+                            </td>
+
+
+                            <td class="entity-description">
+
+                                {% if category.description %}
+                                    {{ category.description|truncatechars:90 }}
+                                {% else %}
+                                    <span class="text-muted">
+                                        —
+                                    </span>
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="table-number">
+                                {{ category.product_count }}
+                            </td>
+
+
+                            <td>
+
+                                {% if category.active %}
+                                    <span class="status status--healthy">
+                                        Active
+                                    </span>
+                                {% else %}
+                                    <span class="status status--inactive">
+                                        Inactive
+                                    </span>
+                                {% endif %}
+
+                            </td>
+
+
+                            {% if perms.catalog.change_category %}
+
+                                <td class="entity-action">
+
+                                    <a
+                                        href="{% url 'catalog:category_edit' category.pk %}"
+                                        class="table-action"
+                                    >
+                                        Edit
+                                    </a>
+
+                                </td>
+
+                            {% endif %}
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="catalog-empty">
+
+            <div class="catalog-empty__title">
+                No categories found
+            </div>
+
+            <p>
+                Try changing the current filters.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

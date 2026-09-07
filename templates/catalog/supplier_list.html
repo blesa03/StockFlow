@@ -1,0 +1,239 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+Suppliers · StockFlow
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Catalog
+        </div>
+
+        <h1 class="page-heading__title">
+            Suppliers
+        </h1>
+
+        <p class="page-heading__description">
+            Supplier directory and catalog relationships.
+        </p>
+
+    </div>
+
+
+    {% if perms.catalog.add_supplier %}
+
+        <a
+            href="{% url 'catalog:supplier_create' %}"
+            class="button button--primary"
+        >
+            + New supplier
+        </a>
+
+    {% endif %}
+
+</div>
+
+
+{% include "catalog/partials/catalog_tabs.html" %}
+
+
+<section class="catalog-panel">
+
+    <form
+        method="get"
+        class="entity-filters"
+    >
+
+        <input
+            type="search"
+            name="q"
+            value="{{ filters.q }}"
+            placeholder="Search suppliers..."
+        >
+
+
+        <select name="active">
+
+            <option
+                value="active"
+                {% if filters.active == "active" %}
+                    selected
+                {% endif %}
+            >
+                Active
+            </option>
+
+            <option
+                value="inactive"
+                {% if filters.active == "inactive" %}
+                    selected
+                {% endif %}
+            >
+                Inactive
+            </option>
+
+            <option
+                value="all"
+                {% if filters.active == "all" %}
+                    selected
+                {% endif %}
+            >
+                All
+            </option>
+
+        </select>
+
+
+        <button
+            type="submit"
+            class="button button--secondary"
+        >
+            Apply
+        </button>
+
+
+        {% if filters.q or filters.active != "active" %}
+
+            <a
+                href="{% url 'catalog:supplier_list' %}"
+                class="filter-clear"
+            >
+                Clear
+            </a>
+
+        {% endif %}
+
+    </form>
+
+
+    {% if suppliers %}
+
+        <div class="table-wrapper">
+
+            <table class="operations-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Supplier</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th class="table-number">Products</th>
+                        <th>Status</th>
+
+                        {% if perms.catalog.change_supplier %}
+                            <th></th>
+                        {% endif %}
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for supplier in suppliers %}
+
+                        <tr>
+
+                            <td>
+                                <div class="entity-name">
+                                    {{ supplier.name }}
+                                </div>
+                            </td>
+
+
+                            <td>
+
+                                {% if supplier.email %}
+                                    {{ supplier.email }}
+                                {% else %}
+                                    <span class="text-muted">
+                                        —
+                                    </span>
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if supplier.phone %}
+                                    {{ supplier.phone }}
+                                {% else %}
+                                    <span class="text-muted">
+                                        —
+                                    </span>
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="table-number">
+                                {{ supplier.product_count }}
+                            </td>
+
+
+                            <td>
+
+                                {% if supplier.active %}
+                                    <span class="status status--healthy">
+                                        Active
+                                    </span>
+                                {% else %}
+                                    <span class="status status--inactive">
+                                        Inactive
+                                    </span>
+                                {% endif %}
+
+                            </td>
+
+
+                            {% if perms.catalog.change_supplier %}
+
+                                <td class="entity-action">
+
+                                    <a
+                                        href="{% url 'catalog:supplier_edit' supplier.pk %}"
+                                        class="table-action"
+                                    >
+                                        Edit
+                                    </a>
+
+                                </td>
+
+                            {% endif %}
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="catalog-empty">
+
+            <div class="catalog-empty__title">
+                No suppliers found
+            </div>
+
+            <p>
+                Try changing the current filters.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

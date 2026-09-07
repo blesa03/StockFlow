@@ -52,12 +52,12 @@
                     class="
                         main-nav__link
 
-                        {% if request.resolver_match.url_name == 'product_list' or request.resolver_match.url_name == 'product_detail' or request.resolver_match.url_name == 'product_create' or request.resolver_match.url_name == 'product_edit' %}
+                        {% if request.resolver_match.namespace == 'catalog' %}
                             main-nav__link--active
                         {% endif %}
                     "
                 >
-                    Products
+                    Catalog
                 </a>
 
             {% endif %}
@@ -73,13 +73,6 @@
             {% if perms.orders.view_order %}
                 <span class="main-nav__link main-nav__link--disabled">
                     Orders
-                </span>
-            {% endif %}
-
-
-            {% if perms.catalog.view_supplier %}
-                <span class="main-nav__link main-nav__link--disabled">
-                    Suppliers
                 </span>
             {% endif %}
 

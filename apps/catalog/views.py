@@ -10,11 +10,17 @@ from django.shortcuts import (
     render,
 )
 
-from .forms import ProductForm
+from .forms import (
+    CategoryForm,
+    ProductForm,
+    SupplierForm,
+)
 from .models import Category, Product, Supplier
 from .selectors import (
+    get_categories,
     get_product_with_stock,
     get_products,
+    get_suppliers,
 )
 
 
@@ -81,6 +87,7 @@ def product_list(request):
             "status": stock_status,
             "active": active,
         },
+        "catalog_section": "products",
     }
 
     return render(
@@ -118,6 +125,7 @@ def product_detail(request, product_id):
     context = {
         "product": product,
         "movements": movements,
+        "catalog_section": "products",
     }
 
     return render(
@@ -160,6 +168,7 @@ def product_create(request):
         {
             "form": form,
             "mode": "create",
+            "catalog_section": "products",
         },
     )
 
@@ -206,5 +215,246 @@ def product_edit(request, product_id):
             "form": form,
             "product": product,
             "mode": "edit",
+            "catalog_section": "products",
+        },
+    )
+
+
+@login_required
+@permission_required(
+    "catalog.view_category",
+    raise_exception=True,
+)
+def category_list(request):
+    search = request.GET.get(
+        "q",
+        "",
+    ).strip()
+
+    active = request.GET.get(
+        "active",
+        "active",
+    )
+
+    categories = get_categories(
+        search=search,
+        active=active,
+    )
+
+    context = {
+        "categories": categories,
+        "filters": {
+            "q": search,
+            "active": active,
+        },
+        "catalog_section": "categories",
+    }
+
+    return render(
+        request,
+        "catalog/category_list.html",
+        context,
+    )
+
+
+@login_required
+@permission_required(
+    "catalog.add_category",
+    raise_exception=True,
+)
+def category_create(request):
+    if request.method == "POST":
+        form = CategoryForm(
+            request.POST,
+        )
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(
+                request,
+                "Category created successfully.",
+            )
+
+            return redirect(
+                "catalog:category_list"
+            )
+
+    else:
+        form = CategoryForm()
+
+    return render(
+        request,
+        "catalog/category_form.html",
+        {
+            "form": form,
+            "mode": "create",
+            "catalog_section": "categories",
+        },
+    )
+
+
+@login_required
+@permission_required(
+    "catalog.change_category",
+    raise_exception=True,
+)
+def category_edit(request, category_id):
+    category = get_object_or_404(
+        Category,
+        pk=category_id,
+    )
+
+    if request.method == "POST":
+        form = CategoryForm(
+            request.POST,
+            instance=category,
+        )
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(
+                request,
+                "Category updated successfully.",
+            )
+
+            return redirect(
+                "catalog:category_list"
+            )
+
+    else:
+        form = CategoryForm(
+            instance=category,
+        )
+
+    return render(
+        request,
+        "catalog/category_form.html",
+        {
+            "form": form,
+            "category": category,
+            "mode": "edit",
+            "catalog_section": "categories",
+        },
+    )
+
+
+@login_required
+@permission_required(
+    "catalog.view_supplier",
+    raise_exception=True,
+)
+def supplier_list(request):
+    search = request.GET.get(
+        "q",
+        "",
+    ).strip()
+
+    active = request.GET.get(
+        "active",
+        "active",
+    )
+
+    suppliers = get_suppliers(
+        search=search,
+        active=active,
+    )
+
+    context = {
+        "suppliers": suppliers,
+        "filters": {
+            "q": search,
+            "active": active,
+        },
+        "catalog_section": "suppliers",
+    }
+
+    return render(
+        request,
+        "catalog/supplier_list.html",
+        context,
+    )
+
+
+@login_required
+@permission_required(
+    "catalog.add_supplier",
+    raise_exception=True,
+)
+def supplier_create(request):
+    if request.method == "POST":
+        form = SupplierForm(
+            request.POST,
+        )
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(
+                request,
+                "Supplier created successfully.",
+            )
+
+            return redirect(
+                "catalog:supplier_list"
+            )
+
+    else:
+        form = SupplierForm()
+
+    return render(
+        request,
+        "catalog/supplier_form.html",
+        {
+            "form": form,
+            "mode": "create",
+            "catalog_section": "suppliers",
+        },
+    )
+
+
+@login_required
+@permission_required(
+    "catalog.change_supplier",
+    raise_exception=True,
+)
+def supplier_edit(request, supplier_id):
+    supplier = get_object_or_404(
+        Supplier,
+        pk=supplier_id,
+    )
+
+    if request.method == "POST":
+        form = SupplierForm(
+            request.POST,
+            instance=supplier,
+        )
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(
+                request,
+                "Supplier updated successfully.",
+            )
+
+            return redirect(
+                "catalog:supplier_list"
+            )
+
+    else:
+        form = SupplierForm(
+            instance=supplier,
+        )
+
+    return render(
+        request,
+        "catalog/supplier_form.html",
+        {
+            "form": form,
+            "supplier": supplier,
+            "mode": "edit",
+            "catalog_section": "suppliers",
         },
     )

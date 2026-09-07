@@ -1,0 +1,165 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+
+{% if mode == "create" %}
+    New supplier · StockFlow
+{% else %}
+    Edit {{ supplier.name }} · StockFlow
+{% endif %}
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="breadcrumb">
+
+    <a href="{% url 'catalog:supplier_list' %}">
+        Suppliers
+    </a>
+
+    <span>/</span>
+
+    <span>
+        {% if mode == "create" %}
+            New supplier
+        {% else %}
+            {{ supplier.name }}
+        {% endif %}
+    </span>
+
+</div>
+
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Catalog
+        </div>
+
+        <h1 class="page-heading__title">
+
+            {% if mode == "create" %}
+                New supplier
+            {% else %}
+                Edit supplier
+            {% endif %}
+
+        </h1>
+
+        <p class="page-heading__description">
+            Supplier contact information and availability.
+        </p>
+
+    </div>
+
+</div>
+
+
+{% include "catalog/partials/catalog_tabs.html" %}
+
+
+<form
+    method="post"
+    class="entity-form"
+>
+
+    {% csrf_token %}
+
+
+    <section class="form-panel">
+
+        <div class="form-panel__header">
+
+            <div class="section-kicker">
+                Supplier
+            </div>
+
+            <h2>
+                Supplier information
+            </h2>
+
+        </div>
+
+
+        <div class="entity-form__body">
+
+            {% for field in form %}
+
+                <div
+                    class="
+                        form-field
+                        {% if field.name == 'active' %}
+                            form-field--checkbox
+                        {% endif %}
+                    "
+                >
+
+                    {% if field.name == "active" %}
+
+                        <label class="checkbox-field">
+
+                            {{ field }}
+
+                            <span>
+                                Active supplier
+                            </span>
+
+                        </label>
+
+                    {% else %}
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                    {% endif %}
+
+
+                    {% for error in field.errors %}
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a
+                href="{% url 'catalog:supplier_list' %}"
+                class="button button--secondary"
+            >
+                Cancel
+            </a>
+
+            <button
+                type="submit"
+                class="button button--primary"
+            >
+
+                {% if mode == "create" %}
+                    Create supplier
+                {% else %}
+                    Save changes
+                {% endif %}
+
+            </button>
+
+        </div>
+
+    </section>
+
+</form>
+
+{% endblock %}
