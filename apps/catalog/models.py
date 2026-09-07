@@ -10,7 +10,7 @@ class Category(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["name"]
+        ordering = ["name"]  # noqa: RUF012
         verbose_name_plural = "categories"
 
     def __str__(self):
@@ -27,7 +27,7 @@ class Supplier(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["name"]
+        ordering = ["name"]  # noqa: RUF012
 
     def __str__(self):
         return self.name
@@ -64,8 +64,8 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["name"]
-        constraints = [
+        ordering = ["name"]  # noqa: RUF012
+        constraints = [  # noqa: RUF012
             models.CheckConstraint(
                 condition=models.Q(price__gte=0),
                 name="catalog_product_price_gte_0",
