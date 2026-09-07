@@ -47,4 +47,9 @@ urlpatterns = [
         "",
         include("apps.accounts.urls"),
     ),
+
+    path(
+        "api/",
+        include("apps.api.urls"),
+    ),
 ]
