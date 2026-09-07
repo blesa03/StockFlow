@@ -1,0 +1,204 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+
+{% if mode == "create" %}
+    New product · StockFlow
+{% else %}
+    Edit {{ product.name }} · StockFlow
+{% endif %}
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="breadcrumb">
+
+    <a href="{% url 'catalog:product_list' %}">
+        Products
+    </a>
+
+    <span>/</span>
+
+    <span>
+        {% if mode == "create" %}
+            New product
+        {% else %}
+            {{ product.sku }}
+        {% endif %}
+    </span>
+
+</div>
+
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Catalog
+        </div>
+
+        <h1 class="page-heading__title">
+
+            {% if mode == "create" %}
+                New product
+            {% else %}
+                Edit product
+            {% endif %}
+
+        </h1>
+
+        <p class="page-heading__description">
+            Product identification, pricing and inventory threshold.
+        </p>
+
+    </div>
+
+</div>
+
+
+<form
+    method="post"
+    class="product-form"
+>
+
+    {% csrf_token %}
+
+
+    {% if form.non_field_errors %}
+
+        <div class="form-error">
+            {{ form.non_field_errors }}
+        </div>
+
+    {% endif %}
+
+
+    <section class="form-panel">
+
+        <div class="form-panel__header">
+
+            <div class="section-kicker">
+                Product
+            </div>
+
+            <h2>
+                Product information
+            </h2>
+
+        </div>
+
+
+        <div class="form-grid">
+
+            {% for field in form %}
+
+                <div
+                    class="
+                        form-field
+                        {% if field.name == 'active' %}
+                            form-field--checkbox
+                        {% endif %}
+                    "
+                >
+
+                    {% if field.name == "active" %}
+
+                        <label class="checkbox-field">
+
+                            {{ field }}
+
+                            <span>
+                                Active product
+                            </span>
+
+                        </label>
+
+                    {% else %}
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                    {% endif %}
+
+
+                    {% if field.help_text %}
+                        <div class="field-help">
+                            {{ field.help_text }}
+                        </div>
+                    {% endif %}
+
+
+                    {% for error in field.errors %}
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <div class="stock-form-notice">
+
+            <strong>
+                Inventory is managed separately.
+            </strong>
+
+            New products start with 0 units.
+            Initial stock must be registered as an inventory movement.
+
+        </div>
+
+
+        <div class="form-actions">
+
+            {% if mode == "edit" %}
+
+                <a
+                    href="{% url 'catalog:product_detail' product.pk %}"
+                    class="button button--secondary"
+                >
+                    Cancel
+                </a>
+
+            {% else %}
+
+                <a
+                    href="{% url 'catalog:product_list' %}"
+                    class="button button--secondary"
+                >
+                    Cancel
+                </a>
+
+            {% endif %}
+
+
+            <button
+                type="submit"
+                class="button button--primary"
+            >
+
+                {% if mode == "create" %}
+                    Create product
+                {% else %}
+                    Save changes
+                {% endif %}
+
+            </button>
+
+        </div>
+
+    </section>
+
+</form>
+
+{% endblock %}

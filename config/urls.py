@@ -20,8 +20,14 @@ urlpatterns = [
         auth_views.LogoutView.as_view(),
         name="logout",
     ),
+
     path(
         "",
         include("apps.dashboard.urls"),
+    ),
+
+    path(
+        "",
+        include("apps.catalog.urls"),
     ),
 ]

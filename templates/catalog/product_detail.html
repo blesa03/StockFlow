@@ -1,0 +1,322 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+{{ product.name }} · StockFlow
+{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb">
+
+    <a href="{% url 'catalog:product_list' %}">
+        Products
+    </a>
+
+    <span>/</span>
+
+    <span>
+        {{ product.sku }}
+    </span>
+
+</div>
+
+
+<div class="product-heading">
+
+    <div>
+
+        <div class="product-heading__sku">
+            {{ product.sku }}
+        </div>
+
+        <h1>
+            {{ product.name }}
+        </h1>
+
+        <div class="product-heading__status">
+
+            {% if not product.active %}
+
+                <span class="status status--inactive">
+                    Inactive
+                </span>
+
+            {% endif %}
+
+
+            {% if product.stock_status == "out" %}
+
+                <span class="status status--out">
+                    Out of stock
+                </span>
+
+            {% elif product.stock_status == "low" %}
+
+                <span class="status status--low">
+                    Low stock
+                </span>
+
+            {% else %}
+
+                <span class="status status--healthy">
+                    In stock
+                </span>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    {% if perms.catalog.change_product %}
+
+        <a
+            href="{% url 'catalog:product_edit' product.pk %}"
+            class="button button--secondary"
+        >
+            Edit product
+        </a>
+
+    {% endif %}
+
+</div>
+
+
+<div class="product-detail-grid">
+
+    <section class="detail-panel">
+
+        <div class="detail-panel__header">
+
+            <div class="section-kicker">
+                Catalog
+            </div>
+
+            <h2>
+                Product information
+            </h2>
+
+        </div>
+
+
+        <dl class="product-facts">
+
+            <div>
+                <dt>Category</dt>
+                <dd>{{ product.category.name }}</dd>
+            </div>
+
+
+            <div>
+                <dt>Supplier</dt>
+                <dd>
+                    {% if product.supplier %}
+                        {{ product.supplier.name }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </dd>
+            </div>
+
+
+            <div>
+                <dt>Unit price</dt>
+                <dd>
+                    €{{ product.price }}
+                </dd>
+            </div>
+
+
+            <div>
+                <dt>Catalog status</dt>
+                <dd>
+                    {% if product.active %}
+                        Active
+                    {% else %}
+                        Inactive
+                    {% endif %}
+                </dd>
+            </div>
+
+        </dl>
+
+    </section>
+
+
+    <section class="detail-panel inventory-snapshot">
+
+        <div class="detail-panel__header">
+
+            <div class="section-kicker">
+                Inventory
+            </div>
+
+            <h2>
+                Current position
+            </h2>
+
+        </div>
+
+
+        <div class="inventory-numbers">
+
+            <div>
+
+                <span>Current stock</span>
+
+                <strong>
+                    {{ product.stock_quantity }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>Minimum stock</span>
+
+                <strong>
+                    {{ product.minimum_stock }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="inventory-note">
+            Stock cannot be edited from the product catalog.
+            Inventory changes must be registered as movements.
+        </div>
+
+    </section>
+
+</div>
+
+
+<section class="detail-panel movements-panel">
+
+    <div class="detail-panel__header">
+
+        <div class="section-kicker">
+            Traceability
+        </div>
+
+        <h2>
+            Recent stock movements
+        </h2>
+
+    </div>
+
+
+    {% if movements %}
+
+        <div class="table-wrapper">
+
+            <table class="operations-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th class="table-number">Change</th>
+                        <th class="table-number">Before</th>
+                        <th class="table-number">After</th>
+                        <th>Reason</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for movement in movements %}
+
+                        <tr>
+
+                            <td>
+                                {{ movement.created_at|date:"d M Y H:i" }}
+                            </td>
+
+
+                            <td>
+                                {{ movement.get_movement_type_display }}
+                            </td>
+
+
+                            <td class="table-number">
+
+                                <span
+                                    class="
+                                        movement-delta
+
+                                        {% if movement.quantity_delta > 0 %}
+                                            movement-delta--positive
+                                        {% else %}
+                                            movement-delta--negative
+                                        {% endif %}
+                                    "
+                                >
+                                    {% if movement.quantity_delta > 0 %}
+                                        +{{ movement.quantity_delta }}
+                                    {% else %}
+                                        {{ movement.quantity_delta }}
+                                    {% endif %}
+                                </span>
+
+                            </td>
+
+
+                            <td class="table-number">
+                                {{ movement.quantity_before }}
+                            </td>
+
+
+                            <td class="table-number">
+                                {{ movement.quantity_after }}
+                            </td>
+
+
+                            <td>
+
+                                {{ movement.reason }}
+
+                                {% if movement.order %}
+                                    <div class="table-secondary">
+                                        {{ movement.order.order_number }}
+                                    </div>
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="catalog-empty">
+
+            <div class="catalog-empty__title">
+                No movements yet
+            </div>
+
+            <p>
+                Inventory activity for this product will appear here.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}
