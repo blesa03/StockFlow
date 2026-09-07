@@ -1,0 +1,356 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+Orders · StockFlow
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Operations
+        </div>
+
+        <h1 class="page-heading__title">
+            Orders
+        </h1>
+
+        <p class="page-heading__description">
+            Manage order drafts and monitor their operational status.
+        </p>
+
+    </div>
+
+
+    {% if perms.orders.add_order %}
+
+        <a
+            href="{% url 'orders:order_create' %}"
+            class="button button--primary"
+        >
+            + New order
+        </a>
+
+    {% endif %}
+
+</div>
+
+
+<section class="order-summary">
+
+    <div class="order-summary__item">
+
+        <span>
+            Total orders
+        </span>
+
+        <strong>
+            {{ metrics.total }}
+        </strong>
+
+    </div>
+
+
+    <div class="order-summary__item">
+
+        <span>
+            Draft
+        </span>
+
+        <strong
+            class="
+                {% if metrics.draft %}
+                    order-metric-draft
+                {% endif %}
+            "
+        >
+            {{ metrics.draft }}
+        </strong>
+
+    </div>
+
+
+    <div class="order-summary__item">
+
+        <span>
+            Confirmed
+        </span>
+
+        <strong
+            class="
+                {% if metrics.confirmed %}
+                    order-metric-confirmed
+                {% endif %}
+            "
+        >
+            {{ metrics.confirmed }}
+        </strong>
+
+    </div>
+
+
+    <div class="order-summary__item">
+
+        <span>
+            Cancelled
+        </span>
+
+        <strong>
+            {{ metrics.cancelled }}
+        </strong>
+
+    </div>
+
+</section>
+
+
+<section class="catalog-panel">
+
+    <form
+        method="get"
+        class="order-filters"
+    >
+
+        <input
+            type="search"
+            name="q"
+            value="{{ filters.q }}"
+            placeholder="Order number, customer or notes..."
+        >
+
+
+        <select name="status">
+
+            <option value="">
+                All statuses
+            </option>
+
+            {% for value, label in statuses %}
+
+                <option
+                    value="{{ value }}"
+                    {% if filters.status == value %}
+                        selected
+                    {% endif %}
+                >
+                    {{ label }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <button
+            type="submit"
+            class="button button--secondary"
+        >
+            Apply
+        </button>
+
+
+        {% if filters.q or filters.status %}
+
+            <a
+                href="{% url 'orders:order_list' %}"
+                class="filter-clear"
+            >
+                Clear
+            </a>
+
+        {% endif %}
+
+    </form>
+
+
+    {% if page.object_list %}
+
+        <div class="table-wrapper">
+
+            <table class="operations-table orders-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Order</th>
+                        <th>Customer</th>
+                        <th class="table-number">
+                            Items
+                        </th>
+                        <th class="table-number">
+                            Total
+                        </th>
+                        <th>Status</th>
+                        <th>Created by</th>
+                        <th>Created</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for order in page %}
+
+                        <tr>
+
+                            <td>
+
+                                <span class="order-number">
+                                    {{ order.order_number }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="entity-name">
+                                    {{ order.customer_name }}
+                                </div>
+
+                                {% if order.notes %}
+
+                                    <div class="order-note-preview">
+                                        {{ order.notes|truncatechars:55 }}
+                                    </div>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="table-number">
+                                {{ order.item_count }}
+                            </td>
+
+
+                            <td class="table-number order-total">
+                                €{{ order.total_amount|floatformat:2 }}
+                            </td>
+
+
+                            <td>
+
+                                {% if order.status == "DRAFT" %}
+
+                                    <span class="order-status order-status--draft">
+                                        Draft
+                                    </span>
+
+                                {% elif order.status == "CONFIRMED" %}
+
+                                    <span class="order-status order-status--confirmed">
+                                        Confirmed
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="order-status order-status--cancelled">
+                                        Cancelled
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if order.created_by %}
+
+                                    {% if order.created_by.get_full_name %}
+                                        {{ order.created_by.get_full_name }}
+                                    {% else %}
+                                        {{ order.created_by.username }}
+                                    {% endif %}
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        —
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="order-date">
+                                {{ order.created_at|date:"d M Y H:i" }}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        {% if page.paginator.num_pages > 1 %}
+
+            <div class="pagination">
+
+                <div class="pagination__summary">
+                    Page {{ page.number }}
+                    of {{ page.paginator.num_pages }}
+                </div>
+
+
+                <div class="pagination__actions">
+
+                    {% if page.has_previous %}
+
+                        <a
+                            href="?page={{ page.previous_page_number }}&q={{ filters.q }}&status={{ filters.status }}"
+                            class="button button--secondary button--small"
+                        >
+                            Previous
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if page.has_next %}
+
+                        <a
+                            href="?page={{ page.next_page_number }}&q={{ filters.q }}&status={{ filters.status }}"
+                            class="button button--secondary button--small"
+                        >
+                            Next
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    {% else %}
+
+        <div class="catalog-empty">
+
+            <div class="catalog-empty__title">
+                No orders found
+            </div>
+
+            <p>
+                Create a draft order or change the current filters.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

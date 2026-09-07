@@ -82,9 +82,20 @@
 
 
             {% if perms.orders.view_order %}
-                <span class="main-nav__link main-nav__link--disabled">
+
+                <a
+                    href="{% url 'orders:order_list' %}"
+                    class="
+                        main-nav__link
+
+                        {% if request.resolver_match.namespace == 'orders' %}
+                            main-nav__link--active
+                        {% endif %}
+                    "
+                >
                     Orders
-                </span>
+                </a>
+
             {% endif %}
 
 

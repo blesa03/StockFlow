@@ -35,4 +35,9 @@ urlpatterns = [
         "",
         include("apps.inventory.urls"),
     ),
+
+    path(
+        "",
+        include("apps.orders.urls"),
+    ),
 ]

@@ -1,0 +1,223 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}
+New order · StockFlow
+{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb">
+
+    <a href="{% url 'orders:order_list' %}">
+        Orders
+    </a>
+
+    <span>/</span>
+
+    <span>
+        New order
+    </span>
+
+</div>
+
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="page-heading__eyebrow">
+            Order workflow
+        </div>
+
+        <h1 class="page-heading__title">
+            New order
+        </h1>
+
+        <p class="page-heading__description">
+            Create an empty draft before adding products.
+        </p>
+
+    </div>
+
+</div>
+
+
+<form
+    method="post"
+    class="order-form"
+>
+
+    {% csrf_token %}
+
+
+    {% if form.non_field_errors %}
+
+        <div class="form-error">
+
+            {% for error in form.non_field_errors %}
+
+                <div>
+                    {{ error }}
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    <section class="form-panel">
+
+        <div class="form-panel__header">
+
+            <div class="section-kicker">
+                Draft
+            </div>
+
+            <h2>
+                Order information
+            </h2>
+
+        </div>
+
+
+        <div class="entity-form__body">
+
+            {% for field in form %}
+
+                <div class="form-field">
+
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+
+                    {{ field }}
+
+
+                    {% if field.help_text %}
+
+                        <div class="field-help">
+                            {{ field.help_text }}
+                        </div>
+
+                    {% endif %}
+
+
+                    {% for error in field.errors %}
+
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <div class="order-workflow-note">
+
+            <div class="order-workflow-note__step">
+
+                <span class="workflow-number">
+                    1
+                </span>
+
+                <div>
+
+                    <strong>
+                        Create draft
+                    </strong>
+
+                    <span>
+                        No inventory is changed.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="order-workflow-note__arrow">
+                →
+            </div>
+
+
+            <div class="order-workflow-note__step">
+
+                <span class="workflow-number">
+                    2
+                </span>
+
+                <div>
+
+                    <strong>
+                        Add products
+                    </strong>
+
+                    <span>
+                        Lines remain editable.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="order-workflow-note__arrow">
+                →
+            </div>
+
+
+            <div class="order-workflow-note__step">
+
+                <span class="workflow-number">
+                    3
+                </span>
+
+                <div>
+
+                    <strong>
+                        Confirm
+                    </strong>
+
+                    <span>
+                        Stock is validated and deducted.
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a
+                href="{% url 'orders:order_list' %}"
+                class="button button--secondary"
+            >
+                Cancel
+            </a>
+
+
+            <button
+                type="submit"
+                class="button button--primary"
+            >
+                Create draft
+            </button>
+
+        </div>
+
+    </section>
+
+</form>
+
+{% endblock %}
