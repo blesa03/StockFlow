@@ -42,6 +42,7 @@ class StockMovementAdmin(admin.ModelAdmin):
         "quantity_delta",
         "quantity_before",
         "quantity_after",
+        "order",
         "created_by",
     )
 
@@ -54,10 +55,12 @@ class StockMovementAdmin(admin.ModelAdmin):
         "product__sku",
         "product__name",
         "reason",
+        "order__order_number",
     )
 
     readonly_fields = (
         "product",
+        "order",
         "movement_type",
         "quantity_delta",
         "quantity_before",
@@ -75,7 +78,11 @@ class StockMovementAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
-        return request.method in ("GET", "HEAD", "OPTIONS")
+        return request.method in (
+            "GET",
+            "HEAD",
+            "OPTIONS",
+        )
 
     def has_delete_permission(self, request, obj=None):
         return False

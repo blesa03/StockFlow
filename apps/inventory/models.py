@@ -40,6 +40,14 @@ class StockMovement(models.Model):
         related_name="stock_movements",
     )
 
+    order = models.ForeignKey(
+        "orders.Order",
+        on_delete=models.SET_NULL,
+        related_name="stock_movements",
+        null=True,
+        blank=True,
+    )
+
     movement_type = models.CharField(
         max_length=20,
         choices=MovementType.choices,
@@ -79,8 +87,10 @@ class StockMovement(models.Model):
             ),
             models.CheckConstraint(
                 condition=models.Q(
-                    quantity_after=models.F("quantity_before")
-                    + models.F("quantity_delta")
+                    quantity_after=(
+                        models.F("quantity_before")
+                        + models.F("quantity_delta")
+                    )
                 ),
                 name="inventory_movement_balance_consistent",
             ),
