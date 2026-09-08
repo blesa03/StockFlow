@@ -33,3 +33,6 @@ Thumbs.db
 coverage.xml
 htmlcov/
 .ruff_cache/
+
+# BD
+*.sql
