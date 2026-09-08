@@ -1099,3 +1099,11 @@ The result is intentionally more than a collection of CRUD screens: the applicat
 **Django · PostgreSQL · HTMX · REST API · Docker**
 
 </div>
+
+<div align="center">
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+</div2>
